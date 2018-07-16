@@ -16,7 +16,7 @@ var scaleBar = d3.geoScaleBar()
   .projection(d3GeoProjection)
   .fitSize([width, height], geoJsonObject);
 
-d3.select("svg").appeng("g").call(scaleBar);
+d3.select("svg").append("g").call(scaleBar);
 
 </script>
 ```
