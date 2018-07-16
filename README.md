@@ -12,7 +12,7 @@ If you use NPM, `npm install d3-geo-scale-bar`.
 <script src="https://unpkg.com/d3-geo-scale-bar@0.0.1/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
-var scaleBar = d3.scaleBar()
+var scaleBar = d3.geoScaleBar()
   .projection(d3GeoProjection)
   .fitSize([width, height], geoJsonObject);
 
