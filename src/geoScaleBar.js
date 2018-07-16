@@ -4,6 +4,8 @@ export default function(){
   var extent,
       projection,
       feature,
+      mG,
+      kG,
       mRect,
       kRect,
       mText,
@@ -49,18 +51,19 @@ export default function(){
 
     context.attr("width", extent[0]).attr("height", extent[1]);
 
-    mRect = mRect || context.append("rect");
+    mG = mG || context.append("g")
+        .attr("class", "miles");
+
+    mRect = mRect || mG.append("rect");
     mRect
-      .attr("class", "miles")
       .attr("width", miles_width_of_bar)
       .attr("height", height)
       .attr("transform", "translate(0, 12)")
       .attr("y", top_of_bar)
       .attr("x", left_of_bar);
 
-    mText = mText || context.append("text");
+    mText = mText || mG.append("text");
     mText
-      .attr("class", "miles")
       .attr("x", left_of_bar)
       .attr("y", top_of_bar - 3)
       .attr("transform", "translate(0, 12)")
@@ -68,18 +71,19 @@ export default function(){
       .style("font-size", "12px")
       .text(numberCommas(miles) + " mile" + (miles === 1 ? "" : "s"));
 
-    kRect = kRect || context.append("rect");
+    kG = kG || context.append("g")
+        .attr("class", "kilometers");
+
+    kRect = kRect || kG.append("rect");
     kRect
-      .attr("class", "kilometers")
       .attr("width", kilometers_width_of_bar)
       .attr("height", height)
       .attr("transform", "translate(0, 42)")
       .attr("y", top_of_bar)
       .attr("x", left_of_bar);
 
-    kText = kText || context.append("text");
+    kText = kText || kG.append("text");
     kText
-      .attr("class", "kilometers")
       .attr("x", left_of_bar)
       .attr("y", top_of_bar - 3)
       .attr("transform", "translate(0, 42)")
