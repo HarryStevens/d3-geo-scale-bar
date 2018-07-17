@@ -11,7 +11,7 @@ Scale bars help viewers understand the geographic extent of maps. Printed maps, 
 If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest release](https://github.com/HarryStevens/d3-geo-scale-bar/raw/master/build/d3-geo-scale-bar.zip). AMD, CommonJS, and vanilla environments are supported. In vanilla, a d3 global is exported:
 
 ```html
-<script src="https://unpkg.com/d3-geo-scale-bar@0.1.2/build/d3-geo-scale-bar.min.js"></script>
+<script src="https://unpkg.com/d3-geo-scale-bar@0.1.4/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
 var scaleBar = d3.geoScaleBar()
@@ -60,10 +60,10 @@ A scale bar consists of two [g elements](https://www.w3.org/TR/SVG/struct.html#G
       1,000
     </text>
   </g>
-  <rect height="4" x="0" width="50" style="stroke: rgb(0, 0, 0); fill: rgb(0, 0, 0);"></rect>
-  <rect height="4" x="50" width="50" style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255);"></rect>
-  <rect height="4" x="100" width="200" style="stroke: rgb(0, 0, 0); fill: rgb(0, 0, 0);"></rect>
-  <text class="label" y="-4" style="fill: rgb(0, 0, 0); text-anchor: start; font-size: 12px;">
+  <rect height="4" x="0" width="50" style="stroke: #000; fill: #000;"></rect>
+  <rect height="4" x="50" width="50" style="stroke: #000; fill: #fff;"></rect>
+  <rect height="4" x="100" width="200" style="stroke: #000; fill: #000;"></rect>
+  <text class="label" y="-4" style="fill: #000; text-anchor: start; font-size: 12px;">
     Miles
   </text>
 </g>

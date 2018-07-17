@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.1.2. Copyright 2018 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.1.3. Copyright 2018 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -3085,6 +3085,8 @@
       var milesRects = mG.selectAll("rect")
           .data(milesAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
+      milesRects.exit().remove();
+
       milesRects.enter().append("rect")
           .attr("height", height)
           .style("stroke", "#000")
@@ -3095,7 +3097,7 @@
 
       milesText = milesText || mG.append("text")
         .attr("class", "label")
-        .style("fill", "black")
+        .style("fill", "#000")
         .style("text-anchor", "start")
         .style("font-size", "12px")
         .attr("y", -4)
@@ -3118,6 +3120,8 @@
       var kilometersRects = kG.selectAll("rect")
           .data(kilometersAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
+      kilometersRects.exit().remove();
+
       kilometersRects.enter().append("rect")
           .attr("height", height)
           .style("stroke", "#000")
@@ -3128,7 +3132,7 @@
 
       kilometersText = kilometersText || kG.append("text")
         .attr("class", "label")
-        .style("fill", "black")
+        .style("fill", "#000")
         .style("text-anchor", "start")
         .style("font-size", "12px")
         .attr("y", -4)
