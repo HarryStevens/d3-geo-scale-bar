@@ -69,15 +69,15 @@ export default function(){
         .call(milesAxis);
 
     var milesRects = mG.selectAll("rect")
-        .data(milesAxis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
+        .data(milesAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
     milesRects.enter().append("rect")
         .attr("height", height)
         .style("stroke", "#000")
-        .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+        .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
       .merge(milesRects)
-        .attr("x", d => milesScale(d[0]) + 1)
-        .attr("width", d => milesScale(d[1] - d[0]));
+        .attr("x", function(d){ return milesScale(d[0]); })
+        .attr("width", function(d){ return milesScale(d[1] - d[0]); });
 
     milesText = milesText || mG.append("text")
       .attr("class", "label")
@@ -102,15 +102,15 @@ export default function(){
         .call(kilometersAxis);
 
     var kilometersRects = kG.selectAll("rect")
-        .data(kilometersAxis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
+        .data(kilometersAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
     kilometersRects.enter().append("rect")
         .attr("height", height)
         .style("stroke", "#000")
-        .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+        .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
       .merge(kilometersRects)
-        .attr("x", d => kilometersScale(d[0]))
-        .attr("width", d => kilometersScale(d[1] - d[0]));
+        .attr("x", function(d){ return kilometersScale(d[0]); })
+        .attr("width", function(d){ return kilometersScale(d[1] - d[0]); });
 
     kilometersText = kilometersText || kG.append("text")
       .attr("class", "label")

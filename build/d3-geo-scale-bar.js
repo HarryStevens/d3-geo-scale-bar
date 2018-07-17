@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.0.4. Copyright 2018 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.1.0. Copyright 2018 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -3083,15 +3083,15 @@
           .call(milesAxis);
 
       var milesRects = mG.selectAll("rect")
-          .data(milesAxis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
+          .data(milesAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
       milesRects.enter().append("rect")
           .attr("height", height)
           .style("stroke", "#000")
-          .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+          .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
         .merge(milesRects)
-          .attr("x", d => milesScale(d[0]) + 1)
-          .attr("width", d => milesScale(d[1] - d[0]));
+          .attr("x", function(d){ return milesScale(d[0]); })
+          .attr("width", function(d){ return milesScale(d[1] - d[0]); });
 
       milesText = milesText || mG.append("text")
         .attr("class", "label")
@@ -3116,15 +3116,15 @@
           .call(kilometersAxis);
 
       var kilometersRects = kG.selectAll("rect")
-          .data(kilometersAxis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
+          .data(kilometersAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
       kilometersRects.enter().append("rect")
           .attr("height", height)
           .style("stroke", "#000")
-          .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+          .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
         .merge(kilometersRects)
-          .attr("x", d => kilometersScale(d[0]))
-          .attr("width", d => kilometersScale(d[1] - d[0]));
+          .attr("x", function(d){ return kilometersScale(d[0]); })
+          .attr("width", function(d){ return kilometersScale(d[1] - d[0]); });
 
       kilometersText = kilometersText || kG.append("text")
         .attr("class", "label")
@@ -3153,28 +3153,28 @@
       return arguments.length ? (projection$$1 = proj, scaleBar) : projection$$1;
     };
 
-    scaleBar.milesRadius = function(_) {
-      return arguments.length ? (milesRadius = +_, scaleBar) : milesRadius;
+    scaleBar.kilometers = function(_) {
+      return arguments.length ? (kilometers = +_, scaleBar) : kilometers;
     };
 
     scaleBar.kilometersRadius = function(_) {
       return arguments.length ? (kilometersRadius = +_, scaleBar) : kilometersRadius;
     };
 
+    scaleBar.kilometersTickValues = function(_) {
+      return arguments.length ? (kilometersTickValues = _, scaleBar) : kilometersTickValues;
+    };
+
     scaleBar.miles = function(_) {
       return arguments.length ? (miles = +_, scaleBar) : miles;
     };
 
+    scaleBar.milesRadius = function(_) {
+      return arguments.length ? (milesRadius = +_, scaleBar) : milesRadius;
+    };
+
     scaleBar.milesTickValues = function(_) {
       return arguments.length ? (milesTickValues = _, scaleBar) : milesTickValues;
-    };
-
-    scaleBar.kilometers = function(_) {
-      return arguments.length ? (kilometers = +_, scaleBar) : kilometers;
-    };
-
-    scaleBar.kilometersTickValues = function(_) {
-      return arguments.length ? (kilometersTickValues = _, scaleBar) : kilometersTickValues;
     };
 
     scaleBar.height = function(_) {
