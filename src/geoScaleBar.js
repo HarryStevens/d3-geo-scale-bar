@@ -71,6 +71,8 @@ export default function(){
     var milesRects = mG.selectAll("rect")
         .data(milesAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
+    milesRects.exit().remove();
+
     milesRects.enter().append("rect")
         .attr("height", height)
         .style("stroke", "#000")
@@ -103,6 +105,8 @@ export default function(){
 
     var kilometersRects = kG.selectAll("rect")
         .data(kilometersAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
+
+    kilometersRects.exit().remove();
 
     kilometersRects.enter().append("rect")
         .attr("height", height)
