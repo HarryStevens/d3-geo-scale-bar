@@ -1,20 +1,22 @@
 import {geoBounds, geoDistance} from "d3-geo";
+import {scaleLinear} from "d3-scale";
+import {axisBottom} from "d3-axis";
 
 export default function(){
   var extent,
       projection,
       feature,
       mG,
-      kG,
-      mRect,
-      kRect,
-      mText,
-      kText,
       miles,
+      milesText,
+      milesTickValues,
+      milesRadius = 3959,
+      kG,
       kilometers,
-      radiusMiles = 3959,
-      radiusKilometers = 6371,
-      height = 1,
+      kilometersTickValues,
+      kilometersText,
+      kilometersRadius = 6371,
+      height = 4,
       left = 0,
       top = 0;
 
@@ -30,8 +32,8 @@ export default function(){
     var point_b = [bounds[1][0], bottom];
     var distance_radians = geoDistance(point_a, point_b)
 
-    var distance_miles = distance_radians * radiusMiles;
-    var distance_kilometers = distance_radians * radiusKilometers;
+    var distance_miles = distance_radians * milesRadius;
+    var distance_kilometers = distance_radians * kilometersRadius;
 
     var point_a_projected = projection(point_a);
     var point_b_projected = projection(point_b);
@@ -51,45 +53,72 @@ export default function(){
 
     context.attr("width", extent[0]).attr("height", extent[1]);
 
+    var milesScale = scaleLinear()
+      .range([0, miles_width_of_bar])
+      .domain([0, miles]);
+
+    var milesAxis = axisBottom(milesScale)
+      .tickValues(milesTickValues ? milesTickValues : [0, miles / 4, miles / 2, miles])
+      .tickSize(height);
+
     mG = mG || context.append("g")
         .attr("class", "miles");
 
-    mRect = mRect || mG.append("rect");
-    mRect
-      .attr("width", miles_width_of_bar)
-      .attr("height", height)
-      .attr("transform", "translate(0, 12)")
-      .attr("y", top_of_bar)
-      .attr("x", left_of_bar);
+    mG
+        .attr("transform", "translate(" + left_of_bar + ", " + (top_of_bar + 14) + ")")
+        .call(milesAxis);
 
-    mText = mText || mG.append("text");
-    mText
-      .attr("x", left_of_bar)
-      .attr("y", top_of_bar - 3)
-      .attr("transform", "translate(0, 12)")
-      .style("font-family", "sans-serif")
+    var milesRects = mG.selectAll("rect")
+        .data(milesAxis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
+
+    milesRects.enter().append("rect")
+        .attr("height", height)
+        .style("stroke", "#000")
+        .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+      .merge(milesRects)
+        .attr("x", d => milesScale(d[0]) + 1)
+        .attr("width", d => milesScale(d[1] - d[0]));
+
+    milesText = milesText || mG.append("text")
+      .attr("class", "label")
+      .style("fill", "black")
+      .style("text-anchor", "start")
       .style("font-size", "12px")
-      .text(numberCommas(miles) + " mile" + (miles === 1 ? "" : "s"));
+      .attr("y", -4)
+      .text("Miles");
+
+    var kilometersScale = scaleLinear()
+      .range([0, kilometers_width_of_bar])
+      .domain([0, kilometers]);
+
+    var kilometersAxis = axisBottom(kilometersScale)
+      .tickValues(kilometersTickValues ? kilometersTickValues : [0, kilometers / 4, kilometers / 2, kilometers])
+      .tickSize(height);
 
     kG = kG || context.append("g")
-        .attr("class", "kilometers");
+    kG
+        .attr("class", "kilometers")
+        .attr("transform", "translate(" + left_of_bar + ", " + (top_of_bar + 50) + ")")
+        .call(kilometersAxis);
 
-    kRect = kRect || kG.append("rect");
-    kRect
-      .attr("width", kilometers_width_of_bar)
-      .attr("height", height)
-      .attr("transform", "translate(0, 42)")
-      .attr("y", top_of_bar)
-      .attr("x", left_of_bar);
+    var kilometersRects = kG.selectAll("rect")
+        .data(kilometersAxis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
 
-    kText = kText || kG.append("text");
-    kText
-      .attr("x", left_of_bar)
-      .attr("y", top_of_bar - 3)
-      .attr("transform", "translate(0, 42)")
-      .style("font-family", "sans-serif")
+    kilometersRects.enter().append("rect")
+        .attr("height", height)
+        .style("stroke", "#000")
+        .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+      .merge(kilometersRects)
+        .attr("x", d => kilometersScale(d[0]))
+        .attr("width", d => kilometersScale(d[1] - d[0]));
+
+    kilometersText = kilometersText || kG.append("text")
+      .attr("class", "label")
+      .style("fill", "black")
+      .style("text-anchor", "start")
       .style("font-size", "12px")
-      .text(numberCommas(kilometers) + " kilometer" + (kilometers === 1 ? "" : "s"));
+      .attr("y", -4)
+      .text("Kilometers");
   }
 
   scaleBar.fitSize = function(e, o){
@@ -110,20 +139,28 @@ export default function(){
     return arguments.length ? (projection = proj, scaleBar) : projection;
   }
 
-  scaleBar.radiusMiles = function(_) {
-    return arguments.length ? (radiusMiles = +_, scaleBar) : radiusMiles;
+  scaleBar.kilometers = function(_) {
+    return arguments.length ? (kilometers = +_, scaleBar) : kilometers;
   }
 
-  scaleBar.radiusKilometers = function(_) {
-    return arguments.length ? (radiusKilometers = +_, scaleBar) : radiusKilometers;
+  scaleBar.kilometersRadius = function(_) {
+    return arguments.length ? (kilometersRadius = +_, scaleBar) : kilometersRadius;
+  }
+
+  scaleBar.kilometersTickValues = function(_) {
+    return arguments.length ? (kilometersTickValues = _, scaleBar) : kilometersTickValues;
   }
 
   scaleBar.miles = function(_) {
     return arguments.length ? (miles = +_, scaleBar) : miles;
   }
 
-  scaleBar.kilometers = function(_) {
-    return arguments.length ? (kilometers = +_, scaleBar) : kilometers;
+  scaleBar.milesRadius = function(_) {
+    return arguments.length ? (milesRadius = +_, scaleBar) : milesRadius;
+  }
+
+  scaleBar.milesTickValues = function(_) {
+    return arguments.length ? (milesTickValues = _, scaleBar) : milesTickValues;
   }
 
   scaleBar.height = function(_) {
@@ -140,10 +177,6 @@ export default function(){
 
   function countDigits(_){
     return Math.floor(_).toString().length;
-  }
-
-  function numberCommas(_){
-    return _.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
   return scaleBar;

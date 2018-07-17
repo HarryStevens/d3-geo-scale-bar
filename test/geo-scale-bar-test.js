@@ -6,9 +6,9 @@ var fs = require("fs"),
 
 tape("geoScaleBar() has the expected defaults", function(test) {
   var s = d3.geoScaleBar();
-  test.equal(s.radiusMiles(), 3959);
-  test.equal(s.radiusKilometers(), 6371);
-  test.equal(s.height(), 1);
+  test.equal(s.milesRadius(), 3959);
+  test.equal(s.kilometersRadius(), 6371);
+  test.equal(s.height(), 4);
   test.equal(s.left(), 0);
   test.equal(s.top(), 0);
   test.end();
