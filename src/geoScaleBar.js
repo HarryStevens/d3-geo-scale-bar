@@ -81,7 +81,7 @@ export default function(){
 
     milesText = milesText || mG.append("text")
       .attr("class", "label")
-      .style("fill", "black")
+      .style("fill", "#000")
       .style("text-anchor", "start")
       .style("font-size", "12px")
       .attr("y", -4)
@@ -114,7 +114,7 @@ export default function(){
 
     kilometersText = kilometersText || kG.append("text")
       .attr("class", "label")
-      .style("fill", "black")
+      .style("fill", "#000")
       .style("text-anchor", "start")
       .style("font-size", "12px")
       .attr("y", -4)
