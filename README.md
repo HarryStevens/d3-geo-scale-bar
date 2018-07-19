@@ -34,27 +34,27 @@ A scale bar's [default design](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e
 A scale bar consists of two [g elements](https://www.w3.org/TR/SVG/struct.html#Groups) of classes "miles" and "kilometers". Each of those contains an [axis](https://github.com/d3/d3-axis#api-reference) with [path elements](https://www.w3.org/TR/SVG/paths.html#PathElement) of class "domain", g elements of class "tick" representing each of the scale's ticks, [rect elements](https://www.w3.org/TR/SVG/shapes.html#RectElement) of alternating black and white fill, and finally a [text element](https://www.w3.org/TR/SVG/text.html#TextElement) of class "label" containing the units of the corresponding scale bar. All of these can be styled and manipulated like normal SVG elements.
 
 ```html
-<g class="miles" transform="translate(0, 14)" font-size="10" font-family="sans-serif" text-anchor="middle">
-  <path class="domain" stroke="#000" d="M0.5,4V0.5H218.62618117029396V4"></path>
+<g class="miles" transform="translate(2, 14)" font-size="10" font-family="sans-serif" text-anchor="middle">
+  <path class="domain" stroke="#000" d="M0.5,4V0.5H200V4"></path>
   <g class="tick" opacity="1" transform="translate(0.5,0)">
     <line stroke="#000" y2="4"></line>
     <text fill="#000" y="7" dy="0.71em">
       0
     </text>
   </g>
-  <g class="tick" opacity="1" transform="translate(55.03154529257349,0)">
+  <g class="tick" opacity="1" transform="translate(50,0)">
     <line stroke="#000" y2="4"></line>
     <text fill="#000" y="7" dy="0.71em">
       250
     </text>
   </g>
-  <g class="tick" opacity="1" transform="translate(109.56309058514698,0)">
+  <g class="tick" opacity="1" transform="translate(100,0)">
     <line stroke="#000" y2="4"></line>
     <text fill="#000" y="7" dy="0.71em">
       500
     </text>
   </g>
-  <g class="tick" opacity="1" transform="translate(218.62618117029396,0)">
+  <g class="tick" opacity="1" transform="translate(200,0)">
     <line stroke="#000" y2="4"></line>
     <text fill="#000" y="7" dy="0.71em">
       1,000
@@ -62,7 +62,7 @@ A scale bar consists of two [g elements](https://www.w3.org/TR/SVG/struct.html#G
   </g>
   <rect height="4" x="0" width="50" style="stroke: #000; fill: #000;"></rect>
   <rect height="4" x="50" width="50" style="stroke: #000; fill: #fff;"></rect>
-  <rect height="4" x="100" width="200" style="stroke: #000; fill: #000;"></rect>
+  <rect height="4" x="100" width="100" style="stroke: #000; fill: #000;"></rect>
   <text class="label" y="-4" style="fill: #000; text-anchor: start; font-size: 12px;">
     Miles
   </text>
