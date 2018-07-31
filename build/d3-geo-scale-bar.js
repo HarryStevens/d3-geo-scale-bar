@@ -1,4 +1,3 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.1.4. Copyright 2018 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -3022,58 +3021,77 @@
         feature,
         mG,
         miles,
-        milesText,
         milesTickValues,
         milesRadius = 3959,
-        kG,
-        kilometers,
-        kilometersTickValues,
-        kilometersText,
-        kilometersRadius = 6371,
         height = 4,
         left = 0,
-        top = 0;
+        top = 0,
+        scaleFactor = 1;
 
     function scaleBar(context){
       var bounds = geoBounds(feature);
 
+      // debugger
+
+      // Calculate the geo height in pixel.
       var vert_point_a_projected = projection$$1([0, bounds[0][1]]);
       var vert_point_b_projected = projection$$1([0, bounds[1][1]]);
       var height_projected = Math.abs(vert_point_a_projected[1] - vert_point_b_projected[1]);
 
+      // Calculate the geo width in miles.
       var bottom = Math.abs((bounds[1][1] - bounds[0][1]) * top);
       var point_a = [bounds[0][0], bottom];
       var point_b = [bounds[1][0], bottom];
       var distance_radians = distance(point_a, point_b);
 
       var distance_miles = distance_radians * milesRadius;
-      var distance_kilometers = distance_radians * kilometersRadius;
 
+      // Calulate the geo width in pixel.
       var point_a_projected = projection$$1(point_a);
       var point_b_projected = projection$$1(point_b);
       var width_projected = point_b_projected[0] - point_a_projected[0];
       
-      // A very simple algorith for determining a good mileage / kilometerage. This can be overridden.
-      miles = miles || Math.pow(10, countDigits(distance_miles) - 1);
-      var miles_proportion_of_whole = miles / distance_miles;
+      // Calculete a reasonable miles value. TODO OLD.
+      // miles = miles * 1/scaleFactor || Math.pow(10, countDigits(distance_miles) - 1);
+      // var miles_proportion_of_whole = miles / distance_miles;
+      // var miles_width_of_bar = miles_proportion_of_whole * width_projected;
+
+      // Calculete a reasonable initial miles value. 
+      var initialMiles = miles || Math.pow(10, countDigits(distance_miles) - 1);
+
+      // Calculate the bar width for the range (which will remain).
+      var miles_proportion_of_whole = initialMiles / distance_miles;
       var miles_width_of_bar = miles_proportion_of_whole * width_projected;
 
-      kilometers = kilometers || Math.pow(10, countDigits(distance_kilometers) - 1);
-      var kilometers_proportion_of_whole = kilometers / distance_kilometers;
-      var kilometers_width_of_bar = kilometers_proportion_of_whole * width_projected;
-
+      // Set the width and height of the g element.
       var top_of_bar = Math.min(vert_point_a_projected[1], vert_point_b_projected[1]) + (height_projected * top);
       var left_of_bar = Math.min(point_a_projected[0], point_b_projected[0]) + (width_projected * left);
 
-      context.attr("width", extent[0]).attr("height", extent[1]);
+      // Not necessary:
+      // context.attr("width", extent[0]).attr("height", extent[1]);
+
+      // Calculate the initial, static scale.
+      var milesScaleInitial = linear$1()
+        .domain([0, initialMiles])
+        .range([0, miles_width_of_bar]); 
+      var rMaxNew = miles_width_of_bar / scaleFactor;
+      var dMaxNew = milesScaleInitial.invert(rMaxNew);
+
+      // console.log(initialMiles, miles_width_of_bar, appliedMiles);
+      // console.log(dMaxNew)
+      // if (scaleFactor > 2) debugger
 
       var milesScale = linear$1()
-        .range([0, miles_width_of_bar])
-        .domain([0, miles]);
+        .domain([0, dMaxNew])
+        .range([0, miles_width_of_bar]);
 
       var milesAxis = axisBottom(milesScale)
-        .tickValues(milesTickValues ? milesTickValues : [0, miles / 4, miles / 2, miles])
-        .tickSize(height);
+        // .tickValues(milesTickValues ? milesTickValues : [0, appliedMiles / 4, appliedMiles / 2, appliedMiles])
+        // .tickValues(milesTickValues ? milesTickValues : [0, dMaxNew / 4, dMaxNew / 2, dMaxNew])
+        // .tickValues(milesTickValues ? milesTickValues : [0, initialMiles / 4, initialMiles / 2, initialMiles])
+        .ticks(5)
+        .tickSize(0)
+        .tickPadding(6);
 
       mG = mG || context.append("g")
           .attr("class", "miles");
@@ -3082,61 +3100,65 @@
           .attr("transform", "translate(" + left_of_bar + ", " + (top_of_bar + 14) + ")")
           .call(milesAxis);
 
-      var milesRects = mG.selectAll("rect")
-          .data(milesAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
-      milesRects.exit().remove();
+      // d3.selectAll('.line-dash').remove();
 
-      milesRects.enter().append("rect")
-          .attr("height", height)
-          .style("stroke", "#000")
-          .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
-        .merge(milesRects)
-          .attr("x", function(d){ return milesScale(d[0]); })
-          .attr("width", function(d){ return milesScale(d[1] - d[0]); });
+      var tickValues = d3.selectAll('.tick').data();
+      var tickLength = tickValues.length;
+      var lastValue = tickValues.filter((d,i,data) => i === data.length-1)[0];
+      var lastValuePixel = milesScale(lastValue);
+      var dashLengthPixel = lastValuePixel / (tickLength - 1);
 
-      milesText = milesText || mG.append("text")
-        .attr("class", "label")
-        .style("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-size", "12px")
-        .attr("y", -4)
-        .text("Miles");
 
-      var kilometersScale = linear$1()
-        .range([0, kilometers_width_of_bar])
-        .domain([0, kilometers]);
+      var domainPath = d3.select('.domain');
 
-      var kilometersAxis = axisBottom(kilometersScale)
-        .tickValues(kilometersTickValues ? kilometersTickValues : [0, kilometers / 4, kilometers / 2, kilometers])
-        .tickSize(height);
+      domainPath
+        .style('stroke-width', 6)
+        .style('stroke-dashoffset', -3.5)
+        .style('stroke-dasharray', `${dashLengthPixel}, ${dashLengthPixel}`);
 
-      kG = kG || context.append("g");
-      kG
-          .attr("class", "kilometers")
-          .attr("transform", "translate(" + left_of_bar + ", " + (top_of_bar + 50) + ")")
-          .call(kilometersAxis);
 
-      var kilometersRects = kG.selectAll("rect")
-          .data(kilometersAxis.tickValues().map(function(d, i, data){ return [d, data[i + 1]]; }).filter(function(d, i, data){ return i !== data.length - 1; }));
 
-      kilometersRects.exit().remove();
+      // console.log(tickLength, lastValue, lastValuePixel, dashLengthPixel);
 
-      kilometersRects.enter().append("rect")
-          .attr("height", height)
-          .style("stroke", "#000")
-          .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
-        .merge(kilometersRects)
-          .attr("x", function(d){ return kilometersScale(d[0]); })
-          .attr("width", function(d){ return kilometersScale(d[1] - d[0]); });
+      // var mL = mG.append('line')
+      //   .attr('class', 'line-dash')
+      //   .attr('x0', 0)
+      //   .attr('x1', miles_width_of_bar)
+      //   .style('stroke-width', 5)
+      //   .style('stroke', 'tomato')
+      //   .style('stroke-dashoffset', '0%')
+      //   .style('stroke-dasharray', `${dashLengthPixel}, ${dashLengthPixel}`)
 
-      kilometersText = kilometersText || kG.append("text")
-        .attr("class", "label")
-        .style("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-size", "12px")
-        .attr("y", -4)
-        .text("Kilometers");
+
+
+      // var rectData = milesAxis.tickValues()
+      //   .map(function(d, i, data) { return [d, data[i + 1]]; })
+      //   .filter(function(d, i, data) { return i !== data.length - 1; })
+
+
+      // var milesRects = mG.selectAll("rect")
+      //     .data(rectData);
+
+      // milesRects.exit().remove();
+
+      // milesRects.enter().append("rect")
+      //     .attr("height", height)
+      //     .style("stroke", "#000")
+      //     .style("fill", function(d, i){ return i % 2 === 0 ? "#000" : "#fff"; })
+      //   .merge(milesRects)
+      //     .attr("x", function(d){ return milesScale(d[0]); })
+      //     .attr("width", function(d){ return milesScale(d[1] - d[0]); });
+
+      // milesText = milesText || mG.append("text")
+      //   .attr("class", "label")
+      //   .style("fill", "#000")
+      //   .style("text-anchor", "start")
+      //   .style("font-size", "12px")
+      //   .attr("y", -4)
+      //   .text("Miles");
+
+
     }
 
     scaleBar.fitSize = function(e, o){
@@ -3155,18 +3177,6 @@
 
     scaleBar.projection = function(proj) {
       return arguments.length ? (projection$$1 = proj, scaleBar) : projection$$1;
-    };
-
-    scaleBar.kilometers = function(_) {
-      return arguments.length ? (kilometers = +_, scaleBar) : kilometers;
-    };
-
-    scaleBar.kilometersRadius = function(_) {
-      return arguments.length ? (kilometersRadius = +_, scaleBar) : kilometersRadius;
-    };
-
-    scaleBar.kilometersTickValues = function(_) {
-      return arguments.length ? (kilometersTickValues = _, scaleBar) : kilometersTickValues;
     };
 
     scaleBar.miles = function(_) {
@@ -3191,6 +3201,10 @@
 
     scaleBar.top = function(_) {
       return arguments.length ? (top = _ > 1 ? 1 : _ < 0 ? 0 : +_, scaleBar) : top;
+    };
+
+    scaleBar.scaleFactor = function(_) {
+      return arguments.length ? (scaleFactor = _) : scaleFactor;
     };
 
     function countDigits(_){

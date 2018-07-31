@@ -23,6 +23,7 @@
     "url": "https://github.com/HarryStevens/d3-geo-scale-bar"
   },
   "scripts": {
+    "watch": "rollup --config rollup.config.js --watch",
     "pretest": "rm -rf build && mkdir build && rollup -c --banner \"$(preamble)\"",
     "test": "tape 'test/**/*-test.js' && eslint index.js src",
     "prepublish": "npm run test && uglifyjs build/d3-geo-scale-bar.js -c -m -o build/d3-geo-scale-bar.min.js",
