@@ -546,6 +546,38 @@
 
   var lengthSum$1 = adder();
 
+  function countDigits(_) {
+    return Math.floor(_).toString().length;
+  }
+
+  /**
+   * Calculate the max distance in the chosen unit to be displayed
+   * on the legend amd the legend width in pixels based on the max distance.
+   * @param  {number} distRadians      The geo distance in radians.
+   * @param  {number} unitRadius       The earth radius in the chosen unit.
+   * @param  {number} domainMax          The maximum unit distance to display initially.
+   * @param  {number} widthProjected   domainMax projected to pixel.
+   * @return {Object}                  Object holding the max distance in unit and pixel.
+   */
+  function getUnitMeasures(
+    distRadians,
+    unitRadius,
+    domainMax,
+    widthProjected
+  ) {
+    // Calulate the geo width in chosen units (e.g. miles).
+    var distance = distRadians * unitRadius;
+
+    // Calculete a reasonable initial maximum unit value.
+    domainMax = domainMax || Math.pow(10, countDigits(distance) - 1);
+
+    // Calculate the bar width in pixel.
+    var unit_proportion_of_whole = domainMax / distance;
+    var unit_width_of_bar = unit_proportion_of_whole * widthProjected;
+
+    return { domainMax, barWidth: unit_width_of_bar };
+  }
+
   var prefix = "$";
 
   function Map() {}
@@ -2849,6 +2881,27 @@
       ? parseIsoNative
       : utcParse(isoSpecifier);
 
+  /**
+   * Build the scale to use - considering the zoom scale k.
+   * @param  {number} domainMax Max distance in chosen unit (e.g. miles).
+   * @param  {number} unitBarWidth   Width of lagend bar in pixel.
+   * @param  {number} k              Zoom scale.
+   * @return {function}              D3 scale function.
+   */
+  function getScale(domainMax, unitBarWidth, k) {
+    // Calculate the initial, static scale.
+    var scaleInitial = linear$1()
+      .domain([0, domainMax])
+      .range([0, unitBarWidth]);
+
+    // Calculate the scaled miles.
+    var rangeMaxNew = unitBarWidth / k;
+    var domainMaxNew = scaleInitial.invert(rangeMaxNew);
+
+    // Calculate the updated scale.
+    return scaleInitial.copy().domain([0, domainMaxNew]);
+  }
+
   var slice$2 = Array.prototype.slice;
 
   function identity$6(x) {
@@ -3015,21 +3068,95 @@
     return axis(bottom, scale);
   }
 
+  function titleCase(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  /**
+   * Draws legend axis.
+   * @param  {string}      selector  Name of unit (e.g. "miles")
+   * @param  {Object}      position  Left and top bar position.
+   * @param  {function}    scale     D3 scale function.
+   * @param  {Selection}   context   Parent g.
+   * @param  {number}      barWidth  Bar width in pixel.
+   * @param  {number}      barHeight Bar height in pixel.
+   * @return {undefined}             DOM side effects.
+   */
+  function buildAxis(
+    selector,
+    position,
+    scale,
+    context,
+    barWidth,
+    barHeight
+  ) {
+    // Set axis.
+    var axis = axisBottom(scale)
+      .ticks(5)
+      .tickSize(0)
+      // minimum of 8, increments decrease for higher bars:
+      .tickPadding(Math.max(8, barHeight ** 1 / 1.5)); 
+
+    // Build legend g only on initialization.
+    var gUpdate = context.selectAll('g.' + selector).data([1]);
+    var g = gUpdate.enter().append('g').attr('class', selector);
+
+    // Draw axis (re-select as g is empty on update).
+    d3.select('g.' + selector)
+      .attr('transform', 'translate(' + position.left + ', ' + position.top + ')')
+      .call(axis);
+
+    // Calculate tick distances.
+    var tickValues = d3.selectAll('.' + selector + ' .tick').data();
+    var lastValue = tickValues.filter((d, i, data) => i === data.length - 1)[0];
+    var lastValuePixel = scale(lastValue);
+    var tickDistance = lastValuePixel / (tickValues.length - 1);
+
+    // Adapt domain path (we need to remove the 0.5 pixel vertical lines).
+    var domainPath = d3.select('.' + selector + ' .domain');
+    domainPath.attr('d', domainPath.attr('d').replace('V0.5', 'V0'));
+
+    // Add dash-array.
+    domainPath
+      .style('stroke-width', barHeight)
+      .style('stroke-dashoffset', 0)
+      .style('stroke-dasharray', `${tickDistance}, ${tickDistance}`);
+
+    // Add bar frame.
+    g.append('rect')
+      .attr('class', 'bar-frame')
+      .attr('y', -barHeight / 2)
+      .attr('width', barWidth)
+      .attr('height', barHeight)
+      .style('fill', 'none');
+
+    // Add miles text.
+    g.append('text')
+      .attr('class', 'bar-label')
+      .style('fill', '#000')
+      .style('text-anchor', 'start')
+      .style('font-size', '12px')
+      .attr('y', -8)
+      .text(titleCase(selector));
+  }
+
   function geoScaleBar(){
+
+    // Exposed.
     var extent,
-        projection$$1,
         feature,
-        mG,
+        projection$$1,
         miles,
-        milesText,
-        milesTickValues,
         milesRadius = 3959,
-        height = 4,
+        milesTickValues,
+        kilometres,
+        kilometresRadius = 6371,
+        kilometresTickValues,
+        height = 0,
         left = 0,
         top = 0,
-        scaleFactor = 1, // new
-        barHeight = 6, // new
-        barFrame; // new
+        scaleFactor = 1,
+        barHeight = 6;
 
     function scaleBar(context){
       var bounds = geoBounds(feature);
@@ -3050,83 +3177,37 @@
       var point_b_projected = projection$$1(point_b);
       var width_projected = point_b_projected[0] - point_a_projected[0];
 
-      // Calulate the geo width in miles.
-      var distance_miles = distance_radians * milesRadius;
-      
-      // Calculete a reasonable initial miles value. 
-      var initialMiles = miles || Math.pow(10, countDigits(distance_miles) - 1);
-
-      // Calculate the bar width for the range (which will remain).
-      var miles_proportion_of_whole = initialMiles / distance_miles;
-      var miles_width_of_bar = miles_proportion_of_whole * width_projected;
-
       // Set the width and height of the g element.
       var top_of_bar = Math.min(vert_point_a_projected[1], vert_point_b_projected[1]) + (height_projected * top);
       var left_of_bar = Math.min(point_a_projected[0], point_b_projected[0]) + (width_projected * left);
 
-      // Calculate the initial, static scale.
-      var milesScaleInitial = linear$1()
-        .domain([0, initialMiles])
-        .range([0, miles_width_of_bar]); 
-      var rMaxNew = miles_width_of_bar / scaleFactor;
-      var dMaxNew = milesScaleInitial.invert(rMaxNew);
+      // Get key measures.
+      var measuresMiles = getUnitMeasures(distance_radians, milesRadius, miles, width_projected);
+      var measuresKilometres = getUnitMeasures(distance_radians, kilometresRadius, kilometres, width_projected);
 
-      // Calculate the updated scale.
-      var milesScale = linear$1()
-        .domain([0, dMaxNew])
-        .range([0, miles_width_of_bar]);
+      // Get a zoom factor aware scale.
+      var scaleMiles = getScale(measuresMiles.domainMax, measuresMiles.barWidth, scaleFactor);
+      var scaleKilometres = getScale(measuresKilometres.domainMax, measuresKilometres.barWidth, scaleFactor);
 
-      // Set axis.
-      var milesAxis = axisBottom(milesScale)
-        .ticks(5)
-        .tickSize(0)
-        .tickPadding(Math.max(8, barHeight**1/1.5)); // minimum of 8, increments decreasing for higher bars.
+      // Draw the miles axis.
+      buildAxis(
+        'miles', 
+        {left: left_of_bar, top: (top_of_bar + 20)},
+        scaleMiles, 
+        context, 
+        measuresMiles.barWidth,
+        barHeight
+      );
 
-      // Draw axis.
-      mG = mG || context.append("g")
-        .attr("class", "miles");
-
-      mG
-        .attr("transform", "translate(" + left_of_bar + ", " + (top_of_bar + 20) + ")")
-        .call(milesAxis);
-
-      // Calculate tick distances.
-      var tickValues = d3.selectAll('.tick').data();
-      var tickLength = tickValues.length;
-      var lastValue = tickValues.filter((d,i,data) => i === data.length-1)[0];
-      var lastValuePixel = milesScale(lastValue);
-      var tickDistance = lastValuePixel / (tickLength - 1);
-
-      // Adapt domain path (we need to remove the 0.5 pixel vertical lines).
-      var domainPath = d3.select('.domain');
-      domainPath.attr('d', domainPath.attr('d').replace('V0.5', 'V0'));
-
-      // Add dash-array.
-      domainPath
-        .style('stroke-width', barHeight)
-        .style('stroke-dashoffset', 0)
-        .style('stroke-dasharray', `${tickDistance}, ${tickDistance}`);
-
-      // Add bar frame.
-      barFrame = barFrame || mG
-        .append('rect')
-        .attr('class', 'bar-frame')
-        .attr('y', -barHeight / 2)
-        .attr('width', miles_width_of_bar)
-        .attr('height', barHeight)
-        .style('fill', 'none')
-        .style('stroke-width', 0.3);
-
-      // Add miles text.
-      milesText = milesText || mG.append("text")
-        .attr("class", "label")
-        .style("fill", "#000")
-        .style("text-anchor", "start")
-        .style("font-size", "12px")
-        .attr("y", -8)
-        .text("Miles");
-
-
+      // Draw the kilometres axis.
+      buildAxis(
+        'kilometres', 
+        {left: left_of_bar, top: (top_of_bar + 60)},
+        scaleKilometres, 
+        context, 
+        measuresKilometres.barWidth,
+        barHeight
+      );
     }
 
     scaleBar.fitSize = function(e, o){
@@ -3159,6 +3240,18 @@
       return arguments.length ? (milesTickValues = _, scaleBar) : milesTickValues;
     };
 
+    scaleBar.kilometres = function(_) {
+      return arguments.length ? (kilometres = +_, scaleBar) : kilometres;
+    };
+
+    scaleBar.kilometresRadius = function(_) {
+      return arguments.length ? (kilometresRadius = +_, scaleBar) : kilometresRadius;
+    };
+
+    scaleBar.kilometresTickValues = function(_) {
+      return arguments.length ? (kilometresTickValues = _, scaleBar) : kilometresTickValues;
+    };
+
     scaleBar.height = function(_) {
       return arguments.length ? (height = +_, scaleBar) : height;
     };
@@ -3178,10 +3271,6 @@
     scaleBar.barHeight = function(_) {
       return arguments.length ? (barHeight = _, scaleBar) : barHeight;
     };
-
-    function countDigits(_){
-      return Math.floor(_).toString().length;
-    }
 
     return scaleBar;
   }
