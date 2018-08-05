@@ -31,10 +31,10 @@ A scale bar's [default design](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e
 
 [<img alt="Scale Bar Design" src="https://raw.githubusercontent.com/HarryStevens/d3-geo-scale-bar/master/img/default.png">](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e14b8084f94b32464)
 
-A scale bar consists of two [g elements](https://www.w3.org/TR/SVG/struct.html#Groups) of classes "miles" and "kilometers". Each of those contains an [axis](https://github.com/d3/d3-axis#api-reference) with [path elements](https://www.w3.org/TR/SVG/paths.html#PathElement) of class "domain", g elements of class "tick" representing each of the scale's ticks, [rect elements](https://www.w3.org/TR/SVG/shapes.html#RectElement) of alternating black and white fill, and finally a [text element](https://www.w3.org/TR/SVG/text.html#TextElement) of class "label" containing the units of the corresponding scale bar. All of these can be styled and manipulated like normal SVG elements.
+A scale bar consists of a [g element](https://www.w3.org/TR/SVG/struct.html#Groups) of class "scale-bar". That element contains an [axis](https://github.com/d3/d3-axis#api-reference) with a [path element](https://www.w3.org/TR/SVG/paths.html#PathElement) of class "domain", g elements of class "tick" representing each of the scale's ticks, [rect elements](https://www.w3.org/TR/SVG/shapes.html#RectElement) of alternating black and white fill, and finally a [text element](https://www.w3.org/TR/SVG/text.html#TextElement) of class "label" containing the units of the corresponding scale bar. All of these can be styled and manipulated like normal SVG elements.
 
-```html
-<g class="miles" transform="translate(2, 14)" font-size="10" font-family="sans-serif" text-anchor="middle">
+```svg
+<g class="scale-bar" transform="translate(2, 14)" font-size="10" font-family="sans-serif" text-anchor="middle">
   <path class="domain" stroke="#000" d="M0.5,4V0.5H200V4"></path>
   <g class="tick" opacity="1" transform="translate(0.5,0)">
     <line stroke="#000" y2="4"></line>
@@ -64,7 +64,7 @@ A scale bar consists of two [g elements](https://www.w3.org/TR/SVG/struct.html#G
   <rect height="4" x="50" width="50" style="stroke: #000; fill: #fff;"></rect>
   <rect height="4" x="100" width="100" style="stroke: #000; fill: #000;"></rect>
   <text class="label" y="-4" style="fill: #000; text-anchor: start; font-size: 12px;">
-    Miles
+    Kilometers
   </text>
 </g>
 ```
@@ -96,29 +96,46 @@ If *size* is specified, sets the extent such that (1) the scale bar's default to
 
 If *object<* is specified, passes the corresponding GeoJSON Feature or FeatureCollection to the scale bar to allow for calculation of mile and kilometer scales and for positioning of the scale bar on the projected geospatial data. If *object* is not specified, returns the current object.
 
-<a name="scaleBar_kilometers" href="#scaleBar_kilometers">#</a> <i>scaleBar</i>.<b>kilometers</b>([<i>kilometers</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L142 "Source")
+<a name="scaleBar_units" href="#scaleBar_units">#</a> <i>scaleBar</i>.<b>units</b>([<i>units</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L142 "Source")
 
-If *kilometers* is specifed, sets the number of kilometers of the scale bar. Defaults to the largest exponent of 10 that will fit on the map. If *kilometers* is not specified, returns the current number of kilometers of the scale bar.
+If *units* is specifed, sets the units of the scale bar. Defaults to "kilometers". If you set *units* to "miles", the [*radius*]("#scaleBar_radius") will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can override this if you are mapping planets other than Earth. If *units* is not specified, returns the current number of kilometers of the scale bar.
 
-<a name="scaleBar_kilometersRadius" href="#scaleBar_kilometersRadius">#</a> <i>scaleBar</i>.<b>kilometersRadius</b>([<i>kilometers</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L146 "Source")
+<a name="scaleBar_distance" href="#scaleBar_distance">#</a> <i>scaleBar</i>.<b>distance</b>([<i>distance</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L142 "Source")
 
-If *kilometers* is specifed, sets the number of kilometers of the radius of the sphere on which the geospatial data is projected. Defaults to 6,371, [the radius of the Earth](https://www.google.com/search?q=radius+of+earth+in+kilometers). If *kilometers* is not specified, returns the current number of kilometers of the sphere's radius.
+If *distance* is specifed, sets the maxiumum distance of the scale bar in the scale bar's units. Defaults to the largest exponent of 10 that will fit on the map. If *distance* is not specified, returns the current maximum distance of the scale bar.
 
-<a name="scaleBar_kilometersTickValues" href="#scaleBar_kilometersTickValues">#</a> <i>scaleBar</i>.<b>kilometersTickValues</b>([<i>values</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L150 "Source")
+<a name="scaleBar_radius" href="#scaleBar_radius">#</a> <i>scaleBar</i>.<b>radius</b>([<i>radius</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L146 "Source")
+
+If *radius* is specifed, sets the radius of the sphere on which the geospatial data is projected. Defaults to 6,371, [the radius of the Earth](https://www.google.com/search?q=radius+of+earth+in+kilometers). If you set [*units*]("#scaleBar_units") to "miles", the *radius* will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). to  If *radius* is not specified, returns the sphere's current radius.
+
+<a name="scaleBar_tickValues" href="#scaleBar_tickValues">#</a> <i>scaleBar</i>.<b>tickValues</b>([<i>values</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L150 "Source")
 
 If a *values* array is specified, the specified values are used for ticks rather than using the scale bar’s automatic tick generator. Defaults to [0, kilometers / 4, kilometers / 2, kilometers]. If *values* is not specified, returns the current tick values.
 
-<a name="scaleBar_miles" href="#scaleBar_miles">#</a> <i>scaleBar</i>.<b>miles</b>([<i>miles</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L154 "Source")
+<a name="scaleBar_label" href="#scaleBar_label">#</a> <i>scaleBar</i>.<b>label</b>([<i>label</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L150 "Source")
 
-If *miles* is specified, sets the number of miles of the scale bar. Defaults to the largest exponent of 10 that will fit on the map. If *miles* is not specified, returns the current number of miles of the scale bar.
+If a *label* string is specified, updates the text in the scale bar's label to the specified string. Defaults to the capitalized unit, e.g. "Kilometers". If *label* is not specified, returns the current label.
 
-<a name="scaleBar_milesRadius" href="#scaleBar_milesRadius">#</a> <i>scaleBar</i>.<b>milesRadius</b>([<i>miles</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L158 "Source")
+<a name="scaleBar_scaleFactor" href="#scaleBar_scaleFactor">#</a> <i>scaleBar</i>.<b>scaleFactor</b>([<i>k</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L150 "Source")
 
-If *miles* is specified, sets the number of miles of the radius of the sphere on which the geospatial data is projected. Defaults to 3,959, [the radius of the Earth](https://www.google.com/search?q=radius+of+earth+in+miles). If *miles* is not specified, returns the current number of miles of the sphere's radius.
+If *k* is specified, zooms the scale bar by the *k* scale factor. This will commonly be used in conjunction with [d3-zoom](https://github.com/d3/d3-zoom):
 
-<a name="scaleBar_milesTickValues" href="#scaleBar_milesTickValues">#</a> <i>scaleBar</i>.<b>milesTickValues</b>([<i>values</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L162 "Source")
+```js
 
-If a *values* array is specified, the specified values are used for ticks rather than using the scale bar’s automatic tick generator. Defaults to [0, miles / 4, miles / 2, miles]. If *values* is not specified, returns the current tick values.
+var zoom = d3.zoom()
+  .on("zoom", _ => {
+    var t = d3.event.transform;
+    
+    g.attr("transform", t);
+    
+    scaleBar.scaleFactor(t.k); // Zoom the scale bar by the k scale factor.
+    scaleBarSelection.call(scaleBar);
+  });
+
+svg.call(zoom);
+```
+
+If *k* is not specified, returns the current scale factor.
 
 <a name="scaleBar_height" href="#scaleBar_height">#</a> <i>scaleBar</i>.<b>height</b>([<i>height</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L166 "Source")
 
