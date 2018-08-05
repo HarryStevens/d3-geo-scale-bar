@@ -98,7 +98,7 @@ If *object<* is specified, passes the corresponding GeoJSON Feature or FeatureCo
 
 <a name="scaleBar_units" href="#scaleBar_units">#</a> <i>scaleBar</i>.<b>units</b>([<i>units</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L142 "Source")
 
-If *units* is specifed, sets the units of the scale bar. Defaults to "kilometers". If you set *units* to "miles", the [*radius*]("#scaleBar_radius") will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can override this if you are mapping planets other than Earth. If *units* is not specified, returns the current number of kilometers of the scale bar.
+If *units* is specifed, sets the units of the scale bar. Defaults to "kilometers". If you set *units* to "miles", the [*radius*]("#scaleBar_radius") will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can override this if you are mapping planets other than Earth. If *units* is not specified, returns the current units string.
 
 <a name="scaleBar_distance" href="#scaleBar_distance">#</a> <i>scaleBar</i>.<b>distance</b>([<i>distance</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L142 "Source")
 
@@ -118,7 +118,7 @@ If a *label* string is specified, updates the text in the scale bar's label to t
 
 <a name="scaleBar_scaleFactor" href="#scaleBar_scaleFactor">#</a> <i>scaleBar</i>.<b>scaleFactor</b>([<i>k</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L150 "Source")
 
-If *k* is specified, zooms the scale bar by the *k* scale factor. This will commonly be used in conjunction with [d3-zoom](https://github.com/d3/d3-zoom):
+If *k* is specified, zooms the scale bar by the *k* scale factor. This will commonly [be used](https://bl.ocks.org/HarryStevens/64fc5f1a4489abe78433b7d19510f864) in conjunction with [d3-zoom](https://github.com/d3/d3-zoom):
 
 ```js
 
