@@ -1,3 +1,4 @@
+import babel from "rollup-plugin-babel";
 import resolve from "rollup-plugin-node-resolve";
 
 export default {
@@ -6,16 +7,14 @@ export default {
     extend: true,
     file: "build/d3-geo-scale-bar.js",
     format: "umd",
-    globals: {
-      "d3-axis": "d3",
-      "d3-geo": "d3",
-      "d3-scale": "d3"
-    },
     name: "d3"
   },
   plugins: [
     resolve({
-      only: ["d3-array", "d3-axis", "d3-collection", "d3-color", "d3-format", "d3-geo", "d3-interpolate", "d3-scale", "d3-time", "d3-time-format"]
+      only: ["d3-format"]
+    }),
+    babel({
+      exclude: "node_modules/**"
     })
   ]
-}
+};

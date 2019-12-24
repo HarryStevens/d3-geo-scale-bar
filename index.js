@@ -1,1 +1,1 @@
-export {default as geoScaleBar} from "./src/geoScaleBar";
+export { default as geoScaleBar } from "./src/geoScaleBar";
