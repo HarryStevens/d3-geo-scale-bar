@@ -11,12 +11,12 @@ Scale bars help viewers understand the geographic extent of maps. Printed maps, 
 If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest release](https://github.com/HarryStevens/d3-geo-scale-bar/raw/master/build/d3-geo-scale-bar.zip). AMD, CommonJS, and vanilla environments are supported. In vanilla, a d3 global is exported:
 
 ```html
-<script src="https://unpkg.com/d3-geo-scale-bar@0.3.0/build/d3-geo-scale-bar.min.js"></script>
+<script src="https://unpkg.com/d3-geo-scale-bar@0.3.1/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
 var scaleBar = d3.geoScaleBar()
   .projection(d3GeoProjection)
-  .fitSize([width, height], geoJsonObject);
+  .extent([width, height]);
 
 d3.select("svg").append("g").call(scaleBar);
 
@@ -75,19 +75,19 @@ Constructs a new scale bar generator.
 
 <a name="_scaleBar" href="#_scaleBar">#</a> <i>scaleBar</i>(<i>context</i>) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L27 "Source")
 
-Render the scale bar to the given *context*, which may be either a [selection](https://github.com/d3/d3-selection) of SVG containers (either SVG or G elements) or a corresponding [transition](https://github.com/d3/d3-transition). Configure the scale bar with [*scaleBar*.projection](#scaleBar_projection) and [*scaleBar*.fitSize](#scaleBar_fitSize) before rendering.
+Render the scale bar to the given *context*, which may be either a [selection](https://github.com/d3/d3-selection) of SVG containers (either SVG or G elements) or a corresponding [transition](https://github.com/d3/d3-transition). Configure the scale bar with [*scaleBar*.projection](#scaleBar_projection) and [*scaleBar*.extent](#scaleBar_fitSize) before rendering.
 
 <a name="scaleBar_projection" href="#scaleBar_projection">#</a> <i>scaleBar</i>.<b>projection</b>([<i>projection</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L95 "Source")
 
 If *projection* is specified, sets the [projection](https://github.com/d3/d3-geo#projections) and returns the scale bar. If *projection* is not specified, returns the current projection.
 
-<a name="scaleBar_extent" href="#scaleBar_extent">#</a> <i>scaleBar</i>.<b>extent</b>([<i>size</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L91 "Source")
+<a name="scaleBar_extent" href="#scaleBar_extent">#</a> <i>scaleBar</i>.<b>extent</b>([<i>extent</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L91 "Source")
 
-If *size* is specified, sets the extent such that (1) the scale bar's default top-left corner aligns with the top-left corner of the projected geospatial data, and (2) you can position the scale bar vertically with [*scaleBar*.top](#scaleBar_top) and horizontally with [*scaleBar*.left](#scaleBar_left). If *size* is not specified, returns the current extent.
+If *extent* is specified, sets the extent such that (1) the scale bar's default top-left corner aligns with the top-left corner of the extent, and (2) you can position the scale bar vertically with [*scaleBar*.top](#scaleBar_top) and horizontally with [*scaleBar*.left](#scaleBar_left). If *extent* is not specified, returns the current extent.
 
 <a name="scaleBar_units" href="#scaleBar_units">#</a> <i>scaleBar</i>.<b>units</b>([<i>units</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L99 "Source")
 
-If *units* is specifed, sets the units of the scale bar. Defaults to "kilometers". If you set *units* to "miles", the [*radius*]("#scaleBar_radius") will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can override this if you are mapping planets other than Earth. If *units* is not specified, returns the current units string.
+If a *units* string is specifed, sets the units of the scale bar. Defaults to "kilometers". If you set *units* to "miles", the [*radius*]("#scaleBar_radius") will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can override this if you are mapping planets other than Earth. If *units* is not specified, returns the current units string.
 
 <a name="scaleBar_distance" href="#scaleBar_distance">#</a> <i>scaleBar</i>.<b>distance</b>([<i>distance</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L114 "Source")
 
@@ -95,7 +95,7 @@ If *distance* is specifed, sets the maxiumum distance of the scale bar in the sc
 
 <a name="scaleBar_radius" href="#scaleBar_radius">#</a> <i>scaleBar</i>.<b>radius</b>([<i>radius</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L118 "Source")
 
-If *radius* is specifed, sets the radius of the sphere on which the geospatial data is projected. Defaults to 6,371, [the radius of the Earth](https://www.google.com/search?q=radius+of+earth+in+kilometers). If you set [*units*]("#scaleBar_units") to "miles", the *radius* will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). to  If *radius* is not specified, returns the sphere's current radius.
+If *radius* is specifed, sets the radius of the sphere on which the geospatial data is projected. Defaults to 6,371, [the radius of the Earth](https://www.google.com/search?q=radius+of+earth+in+kilometers). If you set [*units*]("#scaleBar_units") to "miles", the *radius* will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can set the *radius* to any number you like, useful for mapping planets other than Earth. If *radius* is not specified, returns the current radius.
 
 <a name="scaleBar_tickValues" href="#scaleBar_tickValues">#</a> <i>scaleBar</i>.<b>tickValues</b>([<i>values</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L122 "Source")
 
@@ -113,7 +113,7 @@ If *k* is specified, zooms the scale bar by the *k* scale factor. This will comm
 
 var zoom = d3.zoom()
   .on("zoom", _ => {
-    var t = d3.event.transform;
+    const t = d3.event.transform;
     
     g.attr("transform", t);
     
@@ -132,8 +132,8 @@ If *height* is specified, sets the height of the scale bar in pixels. Defaults t
 
 <a name="scaleBar_left" href="#scaleBar_left">#</a> <i>scaleBar</i>.<b>left</b>([<i>left</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L134 "Source")
 
-If *left* is specified, sets the left position to the specified value which must be in the range [0, 1], where 0 is the left-most side of the projected geospatial data and 1 is the right-most. If *left* is not specified, returns the current left position which defaults to 0.
+If *left* is specified, sets the left position to the specified value which must be in the range [0, 1], where 0 is the left-most side of the scale bar's extent and 1 is the right-most. If *left* is not specified, returns the current left position which defaults to 0.
 
 <a name="scaleBar_top" href="#scaleBar_top">#</a> <i>scaleBar</i>.<b>top</b>([<i>top</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L138 "Source")
 
-If *top* is specified, sets the top position to the specified value which must be in the range [0, 1], where 0 is the top-most side of the projected geospatial data and 1 is the bottom-most. If *top* is not specified, returns the current top position which defaults to 0.
+If *top* is specified, sets the top position to the specified value which must be in the range [0, 1], where 0 is the top-most side of the scale bar's extent and 1 is the bottom-most. If *top* is not specified, returns the current top position which defaults to 0.
