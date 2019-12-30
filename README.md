@@ -14,7 +14,7 @@ If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest 
 <script src="https://unpkg.com/d3-geo-scale-bar@0.3.1/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
-var scaleBar = d3.geoScaleBar()
+const scaleBar = d3.geoScaleBar()
   .projection(d3GeoProjection)
   .extent([width, height]);
 
@@ -111,7 +111,7 @@ If *k* is specified, zooms the scale bar by the *k* scale factor. This will comm
 
 ```js
 
-var zoom = d3.zoom()
+const zoom = d3.zoom()
   .on("zoom", _ => {
     const t = d3.event.transform;
     
