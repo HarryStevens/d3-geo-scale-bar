@@ -1,9 +1,7 @@
-import { axisBottom } from "./axis/axis";
 import { default as geoDistance } from "./geo/distance";
-import { default as scaleLinear } from "./scale/linear";
 
 export default function(){
-  let extent,
+  let extent = null,
       projection,
       height = 4,
       left = 0,
@@ -12,7 +10,9 @@ export default function(){
       distance,
       radius = 6371,
       tickValues,
+      tickFormat = d => Math.round(d),
       label,
+      labelAnchor = "start",
       scaleFactor = 1;
 
   const unitPresets = {
@@ -25,71 +25,90 @@ export default function(){
       };
   
   function scaleBar(context){
-    context.attr("width", extent[0]).attr("height", extent[1]);
+    const barWidth = extent[1][0] - extent[0][0],
+          barHeight = extent[1][1] - extent[0][1];
     
-    const x = extent[0] * left,
-          y = extent[1] * top,
+    context.attr("width", barWidth).attr("height", barHeight);
+    
+    const x = extent[0][0] + barWidth * left,
+          y = extent[0][1] + barHeight * top,
           start = projection.invert([x, y]);
     
-    distance = distance || Math.pow(10, countDigits(geoDistance(projection.invert([0, 0]), projection.invert([0, extent[1]])) * radius) - 1);
+    distance = distance || Math.pow(10, countDigits(geoDistance(projection.invert(extent[0]), projection.invert([extent[1][0], extent[0][1]])) * radius) - 1);
     
-    const w = distance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-    
-    const scale = scaleLinear()
-        .range([0, w])
-        .domain([0, distance]);
-
-    if (scaleFactor !== 1){
-      scale
-          .domain([0, scale.invert(w / scaleFactor)]);
-    }
-
-    const tickMax = scale.domain()[1];
-    
-    const axis = axisBottom()
-        .scale(scale)
-        .tickValues(tickValues ? tickValues : [0, tickMax / 4, tickMax / 2, tickMax])
-        .tickSize(height);
+    const w = distance / (geoDistance(start, projection.invert([x + 1, y])) * radius),
+          scale = dist => dist * w / (distance / scaleFactor),
+          tickMax = distance / scaleFactor,
+          ticks = tickValues === null ? [] : tickValues ? tickValues : [0, tickMax / 4, tickMax / 2, tickMax];
     
     let g = context.select("g")
     if (!g._groups[0][0]) {
-      g = context.append("g")
-          .attr("class", "scale-bar");
+      g = context.append("g");
     }
-    g
-        .attr("transform", "translate(" + (extent[0] * left) + ", " + (extent[1] * top) + ")")
-        .call(axis);
+    g.attr("transform", `translate(${[x, y]})`);
+    
+    let baseline = g.select(".baseline")
+    if (!baseline._groups[0][0]) {
+      baseline = g.append("rect")
+          .attr("class", "baseline");
+    }
+    baseline
+        .attr("fill", "black")
+        .attr("height", height)
+        .attr("width", scale(tickMax));
 
-    const rects = g.selectAll("rect")
-        .data(axis.tickValues().map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
+    const rects = g.selectAll(".rectangle")
+        .data(ticks.map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
 
     rects.exit().remove();
 
     rects.enter().append("rect")
+        .attr("class", "rectangle")
         .attr("height", height)
-        .style("stroke", "#000")
-        .style("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
+        .attr("stroke", "#000")
+        .attr("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
       .merge(rects)
         .attr("x", d => scale(d[0]))
         .attr("width", d => scale(d[1] - d[0]));
 
-    let text = g.select(".label");
-    if (!text._groups[0][0]){
-      text = g.append("text")
+    const valueText = g.selectAll(".value")
+        .data(ticks);
+    
+    valueText.exit().remove();
+    
+    valueText.enter().append("text")
+        .attr("class", "value")
+        .attr("text-anchor", "middle")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", 12)
+      .merge(valueText)
+        .attr("x", scale)
+        .attr("y", height + 11)
+        .text(tickFormat); 
+    
+    let labelText = g.select(".label");
+    if (!labelText._groups[0][0]){
+      labelText = g.append("text")
           .attr("class", "label")
     }
-    text
-      .attr("class", "label")
-      .style("fill", "#000")
-      .style("text-anchor", "start")
-      .style("font-size", "12px")
-      .attr("y", -4);
+    labelText
+        .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(tickMax / 2) : scale(tickMax))
+        .attr("class", "label")
+        .attr("fill", "#000")
+        .attr("text-anchor", labelAnchor)
+        .attr("font-size", 14)
+        .attr("font-family", "sans-serif")
+        .attr("y", -4);
     
-    text.text(label || capitalizeFirstLetter(units));
+    labelText.text(label || capitalizeFirstLetter(units));
   }
 
   scaleBar.extent = function(_) {
     return arguments.length ? (extent = _, scaleBar) : extent;
+  }
+  
+  scaleBar.size = function(_) {
+    return arguments.length ? (extent = [[0, 0], _], scaleBar) : extent[1];
   }
 
   scaleBar.projection = function(_) {
@@ -122,9 +141,17 @@ export default function(){
   scaleBar.tickValues = function(_) {
     return arguments.length ? (tickValues = _, scaleBar) : tickValues;
   }
+  
+  scaleBar.tickFormat = function(_) {
+    return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
+  }
 
   scaleBar.label = function(_) {
     return arguments.length ? (label = _, scaleBar) : label;
+  }
+  
+  scaleBar.labelAnchor = function(_) {
+    return arguments.length ? (labelAnchor = _, scaleBar) : labelAnchor;
   }
 
   scaleBar.height = function(_) {
