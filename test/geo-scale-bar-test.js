@@ -15,8 +15,15 @@ tape("geoScaleBar() has the expected defaults", function(test) {
 });
 
 tape("scaleBar.extent(extent) sets the extent explicitly", function(test) {
-  const s = d3.geoScaleBar().extent([100, 100]);
-  test.deepEqual(s.extent(), [100, 100]);
+  const s = d3.geoScaleBar().extent([[0, 0], [100, 100]]);
+  test.deepEqual(s.extent(), [[0, 0], [100, 100]]);
+  test.end();
+});
+
+tape("scaleBar.size(size) sets the size explicitly and the extent implicitly", function(test) {
+  const s = d3.geoScaleBar().size([100, 100]);
+  test.deepEqual(s.extent(), [[0, 0], [100, 100]]);
+  test.deepEqual(s.size(), [100, 100]);
   test.end();
 });
 
@@ -25,11 +32,11 @@ tape("scaleBar(selection) produces the expected result", function(test) {
   const bodyExpected = (new jsdom.JSDOM(file("geo-scale-bar.html"))).window.document.body;
   
   const india = JSON.parse(file("india.json"));
-  const extent = [900, 600];
-  const projection = d3.geoMercator().fitSize(extent, india);
-  const s = d3.geoScaleBar().extent(extent).projection(projection);
-  const svg = d3.select(bodyActual).select("svg").attr("width", extent[0]).attr("height", extent[1]);
-  svg.select("g").call(s);
+  const size = [900, 600];
+  const projection = d3.geoMercator().fitSize(size, india);
+  const s = d3.geoScaleBar().size(size).projection(projection);
+  const svg = d3.select(bodyActual).select("svg").attr("width", size[0]).attr("height", size[1]);
+  svg.append("g").call(s);
   test.equal(bodyActual.outerHTML, bodyExpected.outerHTML);
   test.end();
 });

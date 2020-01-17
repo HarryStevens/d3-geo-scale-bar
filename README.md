@@ -14,11 +14,17 @@ If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest 
 <script src="https://unpkg.com/d3-geo-scale-bar@0.3.1/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
-const scaleBar = d3.geoScaleBar()
-  .projection(d3GeoProjection)
-  .extent([width, height]);
+const projection = d3.geoMercator()
+    .fitSize([width, height], geoJSON)
 
-d3.select("svg").append("g").call(scaleBar);
+const scaleBar = d3.geoScaleBar()
+  .projection()
+  .size([width, height]);
+
+d3.select("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g").call(scaleBar);
 
 </script>
 ```
@@ -31,47 +37,25 @@ A scale bar's [default design](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e
 
 [<img alt="Scale Bar Design" src="https://raw.githubusercontent.com/HarryStevens/d3-geo-scale-bar/master/img/default.png">](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e14b8084f94b32464)
 
-A scale bar consists of a [g element](https://www.w3.org/TR/SVG/struct.html#Groups) of class "scale-bar". That element contains an [axis](https://github.com/d3/d3-axis#api-reference) with a [path element](https://www.w3.org/TR/SVG/paths.html#PathElement) of class "domain", g elements of class "tick" representing each of the scale's ticks, [rect elements](https://www.w3.org/TR/SVG/shapes.html#RectElement) of alternating black and white fill, and finally a [text element](https://www.w3.org/TR/SVG/text.html#TextElement) of class "label" containing the units of the corresponding scale bar. All of these can be styled and manipulated like normal SVG elements.
+A scale bar consists of a [g element](https://www.w3.org/TR/SVG/struct.html#Groups) which, by default, contains one [rect element](https://www.w3.org/TR/SVG/paths.html#RectElement) of class "baseline", three rect elements of class "rectangle" with alternating black and white fill, four [text elements](https://www.w3.org/TR/SVG/text.html#TextElement) of class "value", and one text element of class "label". All of these can be styled and manipulated like normal SVG elements.
 
 ```svg
-<g class="scale-bar" transform="translate(2, 14)" font-size="10" font-family="sans-serif" text-anchor="middle">
-  <path class="domain" stroke="#000" d="M0.5,4V0.5H200V4"></path>
-  <g class="tick" opacity="1" transform="translate(0.5,0)">
-    <line stroke="#000" y2="4"></line>
-    <text fill="#000" y="7" dy="0.71em">
-      0
-    </text>
-  </g>
-  <g class="tick" opacity="1" transform="translate(50,0)">
-    <line stroke="#000" y2="4"></line>
-    <text fill="#000" y="7" dy="0.71em">
-      250
-    </text>
-  </g>
-  <g class="tick" opacity="1" transform="translate(100,0)">
-    <line stroke="#000" y2="4"></line>
-    <text fill="#000" y="7" dy="0.71em">
-      500
-    </text>
-  </g>
-  <g class="tick" opacity="1" transform="translate(200,0)">
-    <line stroke="#000" y2="4"></line>
-    <text fill="#000" y="7" dy="0.71em">
-      1,000
-    </text>
-  </g>
-  <rect height="4" x="0" width="50" style="stroke: #000; fill: #000;"></rect>
-  <rect height="4" x="50" width="50" style="stroke: #000; fill: #fff;"></rect>
-  <rect height="4" x="100" width="100" style="stroke: #000; fill: #000;"></rect>
-  <text class="label" y="-4" style="fill: #000; text-anchor: start; font-size: 12px;">
-    Kilometers
-  </text>
+<g transform="translate(0,0)">
+  <rect class="baseline" fill="black" height="4" width="200"></rect>
+  <rect class="rectangle" height="4" stroke="#000" fill="#000" x="0" width="50"></rect>
+  <rect class="rectangle" height="4" stroke="#000" fill="#fff" x="50" width="50"></rect>
+  <rect class="rectangle" height="4" stroke="#000" fill="#000" x="100" width="100"></rect>
+  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="0" y="15">0</text>
+  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="50" y="15">250</text>
+  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="100" y="15">500</text>
+  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="200" y="15">1000</text>
+  <text class="label" x="0" fill="#000" text-anchor="start" font-size="14" font-family="sans-serif" y="-4">Kilometers</text>
 </g>
 ```
 
 <a name="geoScaleBar" href="#geoScaleBar">#</a> d3.<b>geoScaleBar</b>() [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L5 "Source")
 
-Constructs a new scale bar generator.
+Constructs a new scale bar generator with the default settings.
 
 <a name="_scaleBar" href="#_scaleBar">#</a> <i>scaleBar</i>(<i>context</i>) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L27 "Source")
 
@@ -83,7 +67,15 @@ If *projection* is specified, sets the [projection](https://github.com/d3/d3-geo
 
 <a name="scaleBar_extent" href="#scaleBar_extent">#</a> <i>scaleBar</i>.<b>extent</b>([<i>extent</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L91 "Source")
 
-If *extent* is specified, sets the extent such that (1) the scale bar's default top-left corner aligns with the top-left corner of the extent, and (2) you can position the scale bar vertically with [*scaleBar*.top](#scaleBar_top) and horizontally with [*scaleBar*.left](#scaleBar_left). If *extent* is not specified, returns the current extent.
+If <i>extent</i> is specified, sets the extent of the scale bar generator to the specified bounds and returns the scale bar generator. The extent bounds are specified as an array [[<i>x0</i>, <i>y0</i>], [<i>x1</i>, <i>y1</i>]], where <i>x0</i> is the left side of the extent, <i>y0</i> is the top, <i>x1</i> is the right and <i>y1</i> is the bottom. If extent is not specified, returns the current extent which defaults to null. An extent is required.
+
+<a name="scaleBar_size" href="#scaleBar_size">#</a> <i>scaleBar</i>.<b>size</b>([<i>size</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L91 "Source")
+
+An alias for [<i>scaleBar</i>.extent](#scaleBar_extent) where the minimum x and y of the extent are ⟨0,0⟩. Equivalent to:
+
+```js
+scaleBar.extent([[0, 0], size]);
+```
 
 <a name="scaleBar_units" href="#scaleBar_units">#</a> <i>scaleBar</i>.<b>units</b>([<i>units</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L99 "Source")
 
@@ -99,18 +91,25 @@ If *radius* is specifed, sets the radius of the sphere on which the geospatial d
 
 <a name="scaleBar_tickValues" href="#scaleBar_tickValues">#</a> <i>scaleBar</i>.<b>tickValues</b>([<i>values</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L122 "Source")
 
-If a *values* array is specified, the specified values are used for ticks rather than using the scale bar’s automatic tick generator. Defaults to [0, kilometers / 4, kilometers / 2, kilometers]. If *values* is not specified, returns the current tick values.
+If a <i>values</i> array is specified, the specified values are used for ticks rather than using the scale bar’s automatic tick generator. Defaults to [0, kilometers / 4, kilometers / 2, kilometers]. Passing <i>null</i> removes the values from the scale bar. If <i>values</i> is not specified, returns the current tick values.
+
+<a name="scaleBar_tickFormat" href="#scaleBar_tickFormat">#</a> <i>scaleBar</i>.<b>tickFormat</b>([<i>formatter</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L122 "Source")
+
+If a <i>formatter</i> function is specified, each tick is passed through the formatter before being displayed. Defaults to (d, i, e) => Math.round(d), where d is the tick number, i is the tick index, and e is an array of all tick data. If a <i>formatter</i> is not specified, returns the current formatter.
 
 <a name="scaleBar_label" href="#scaleBar_label">#</a> <i>scaleBar</i>.<b>label</b>([<i>label</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L126 "Source")
 
-If a *label* string is specified, updates the text in the scale bar's label to the specified string. Defaults to the capitalized unit, e.g. "Kilometers". If *label* is not specified, returns the current label.
+If a <i>label</i> string is specified, updates the text in the scale bar's label to the specified string. Defaults to the capitalized unit, e.g. "Kilometers". If *label* is not specified, returns the current label.
+
+<a name="scaleBar_labelAnchor" href="#scaleBar_labelAnchor">#</a> <i>scaleBar</i>.<b>labelAnchor</b>([<i>anchor</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L126 "Source")
+
+If an <i>anchor</i> string is specified, aligns the scale bar's label such that it is either at the "start" of the scale bar, the "middle" of the scale bar, or the "end" of the scale bar. Defaults to "start". If an <i>anchor</i> string is not specified, returns the current anchor.
 
 <a name="scaleBar_scaleFactor" href="#scaleBar_scaleFactor">#</a> <i>scaleBar</i>.<b>scaleFactor</b>([<i>k</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L142 "Source")
 
 If *k* is specified, zooms the scale bar by the *k* scale factor. This will commonly [be used](https://bl.ocks.org/HarryStevens/64fc5f1a4489abe78433b7d19510f864) in conjunction with [d3-zoom](https://github.com/d3/d3-zoom):
 
 ```js
-
 const zoom = d3.zoom()
   .on("zoom", _ => {
     const t = d3.event.transform;

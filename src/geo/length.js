@@ -1,10 +1,8 @@
-// From d3-geo by Mike Bostock
+// Adapted from d3-geo by Mike Bostock
 // Source: https://github.com/d3/d3-geo/blob/master/src/length.js
 // License: https://github.com/d3/d3-geo/blob/master/LICENSE
 
 import adder from "./adder.js";
-import { abs, atan2, cos, radians, sin, sqrt } from "./math.js";
-import noop from "./noop.js";
 import stream from "./stream.js";
 
 let lengthSum = adder(),
@@ -13,12 +11,12 @@ let lengthSum = adder(),
       cosPhi0;
 
 const lengthStream = {
-  sphere: noop,
-  point: noop,
+  sphere: _ => {},
+  point: _ => {},
   lineStart: lengthLineStart,
-  lineEnd: noop,
-  polygonStart: noop,
-  polygonEnd: noop
+  lineEnd: _ => {},
+  polygonStart: _ => {},
+  polygonEnd: _ => {}
 };
 
 function lengthLineStart() {
@@ -27,26 +25,26 @@ function lengthLineStart() {
 }
 
 function lengthLineEnd() {
-  lengthStream.point = lengthStream.lineEnd = noop;
+  lengthStream.point = lengthStream.lineEnd = _ => {};
 }
 
 function lengthPointFirst(lambda, phi) {
-  lambda *= radians, phi *= radians;
-  lambda0 = lambda, sinPhi0 = sin(phi), cosPhi0 = cos(phi);
+  lambda *= Math.PI / 180, phi *= Math.PI / 180;
+  lambda0 = lambda, sinPhi0 = Math.sin(phi), cosPhi0 = Math.cos(phi);
   lengthStream.point = lengthPoint;
 }
 
 function lengthPoint(lambda, phi) {
-  lambda *= radians, phi *= radians;
-  const sinPhi = sin(phi),
-        cosPhi = cos(phi),
-        delta = abs(lambda - lambda0),
-        cosDelta = cos(delta),
-        sinDelta = sin(delta),
+  lambda *= Math.PI / 180, phi *= Math.PI / 180;
+  const sinPhi = Math.sin(phi),
+        cosPhi = Math.cos(phi),
+        delta = Math.abs(lambda - lambda0),
+        cosDelta = Math.cos(delta),
+        sinDelta = Math.sin(delta),
         x = cosPhi * sinDelta,
         y = cosPhi0 * sinPhi - sinPhi0 * cosPhi * cosDelta,
         z = sinPhi0 * sinPhi + cosPhi0 * cosPhi * cosDelta;
-  lengthSum.add(atan2(sqrt(x * x + y * y), z));
+  lengthSum.add(Math.atan2(Math.sqrt(x * x + y * y), z));
   lambda0 = lambda, sinPhi0 = sinPhi, cosPhi0 = cosPhi;
 }
 
