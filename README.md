@@ -11,7 +11,7 @@ Scale bars help viewers understand the geographic extent of maps. Printed maps, 
 If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest release](https://github.com/HarryStevens/d3-geo-scale-bar/raw/master/build/d3-geo-scale-bar.zip). AMD, CommonJS, and vanilla environments are supported. In vanilla, a d3 global is exported:
 
 ```html
-<script src="https://unpkg.com/d3-geo-scale-bar@0.4.0/build/d3-geo-scale-bar.min.js"></script>
+<script src="https://unpkg.com/d3-geo-scale-bar@0.4.1/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
 const projection = d3.geoMercator()
@@ -99,7 +99,7 @@ If a <i>formatter</i> function is specified, each tick is passed through the for
 
 <a name="scaleBar_label" href="#scaleBar_label">#</a> <i>scaleBar</i>.<b>label</b>([<i>label</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L126 "Source")
 
-If a <i>label</i> string is specified, updates the text in the scale bar's label to the specified string. Defaults to the capitalized unit, e.g. "Kilometers". If *label* is not specified, returns the current label.
+If a <i>label</i> string is specified, updates the text in the scale bar's label to the specified string. Defaults to the capitalized unit, e.g. "Kilometers". If label is specified as <i>null</i>, removes the label. If <i>label</i> is not specified, returns the current label.
 
 <a name="scaleBar_labelAnchor" href="#scaleBar_labelAnchor">#</a> <i>scaleBar</i>.<b>labelAnchor</b>([<i>anchor</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L126 "Source")
 

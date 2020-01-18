@@ -91,16 +91,24 @@ export default function(){
       labelText = g.append("text")
           .attr("class", "label")
     }
-    labelText
-        .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(tickMax / 2) : scale(tickMax))
-        .attr("class", "label")
-        .attr("fill", "#000")
-        .attr("text-anchor", labelAnchor)
-        .attr("font-size", 14)
-        .attr("font-family", "sans-serif")
-        .attr("y", -4);
+      
+    if (label === null){
+      labelText.remove();
+    }
+    else {
+      label = label || capitalizeFirstLetter(units);
+      
+      labelText
+          .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(tickMax / 2) : scale(tickMax))
+          .attr("class", "label")
+          .attr("fill", "#000")
+          .attr("text-anchor", labelAnchor)
+          .attr("font-size", 14)
+          .attr("font-family", "sans-serif")
+          .attr("y", -4)
+          .text(label);
+    }
     
-    labelText.text(label || capitalizeFirstLetter(units));
   }
 
   scaleBar.extent = function(_) {
