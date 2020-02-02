@@ -11,7 +11,7 @@ Scale bars help viewers understand the geographic extent of maps. Printed maps, 
 If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest release](https://github.com/HarryStevens/d3-geo-scale-bar/raw/master/build/d3-geo-scale-bar.zip). AMD, CommonJS, and vanilla environments are supported. In vanilla, a d3 global is exported:
 
 ```html
-<script src="https://unpkg.com/d3-geo-scale-bar@0.5.0/build/d3-geo-scale-bar.min.js"></script>
+<script src="https://unpkg.com/d3-geo-scale-bar@0.5.1/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
 const projection = d3.geoMercator()
@@ -37,19 +37,32 @@ A scale bar's [default design](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e
 
 [<img alt="Scale Bar Design" src="https://raw.githubusercontent.com/HarryStevens/d3-geo-scale-bar/master/img/default.png">](https://bl.ocks.org/HarryStevens/8c8d3a489aa1372e14b8084f94b32464)
 
-A scale bar consists of a [g element](https://www.w3.org/TR/SVG/struct.html#Groups) which, by default, contains one [rect element](https://www.w3.org/TR/SVG/paths.html#RectElement) of class "baseline", three rect elements of class "rectangle" with alternating black and white fill, four [text elements](https://www.w3.org/TR/SVG/text.html#TextElement) of class "value", and one text element of class "label". All of these can be styled and manipulated like normal SVG elements.
+A scale bar consists of a [g element](https://www.w3.org/TR/SVG/struct.html#Groups) which, by default, contains one [path element](https://www.w3.org/TR/SVG/paths.html#PathElement) of class "domain", four [g elements](https://www.w3.org/TR/SVG/struct.html#Groups) of class "tick" representing each of the scale bar's ticks. Each tick has a [line element](https://www.w3.org/TR/SVG/shapes.html#LineElement) to draw the tick line, a [text element](https://www.w3.org/TR/SVG/text.html#TextElement) for the tick label, and a [rect element](https://www.w3.org/TR/SVG/shapes.html#RectElement) of alternating black and white fill. There is also another text element of class "label" sitting above the bar that denotes the units. All of these can be styled and manipulated like normal SVG elements.
 
 ```svg
-<g transform="translate(0,0)">
-  <rect class="baseline" fill="black" height="4" width="200"></rect>
-  <rect class="rectangle" height="4" stroke="#000" fill="#000" x="0" width="50"></rect>
-  <rect class="rectangle" height="4" stroke="#000" fill="#fff" x="50" width="50"></rect>
-  <rect class="rectangle" height="4" stroke="#000" fill="#000" x="100" width="100"></rect>
-  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="0" y="15">0</text>
-  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="50" y="15">250</text>
-  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="100" y="15">500</text>
-  <text class="value" text-anchor="middle" font-family="sans-serif" font-size="12" x="200" y="15">1000</text>
-  <text class="label" x="0" fill="#000" text-anchor="start" font-size="14" font-family="sans-serif" y="-4">Kilometers</text>
+<g font-family="sans-serif" transform="translate(0,0)">
+  <path class="domain" fill="none" stroke="currentColor" d="M0,4 L0,0 L200,0 L200,4"></path>
+  <g class="tick" transform="translate(0)" opacity="1">
+    <line stroke="currentColor" y2="4"></line>
+    <text fill="currentColor" y="6" font-size="10" text-anchor="middle" dy="0.71em">0</text>
+    <rect fill="currentColor" stroke="currentColor" stroke-width="0.5" width="50" height="4"></rect>
+  </g>
+  <g class="tick" transform="translate(50)" opacity="1">
+    <line stroke="currentColor" y2="4"></line>
+    <text fill="currentColor" y="6" font-size="10" text-anchor="middle" dy="0.71em">25</text>
+    <rect fill="#fff" stroke="currentColor" stroke-width="0.5" width="50" height="4"></rect>
+  </g>
+  <g class="tick" transform="translate(100)" opacity="1">
+    <line stroke="currentColor" y2="4"></line>
+    <text fill="currentColor" y="6" font-size="10" text-anchor="middle" dy="0.71em">50</text>
+    <rect fill="currentColor" stroke="currentColor" stroke-width="0.5" width="100" height="4"></rect>
+  </g>
+  <g class="tick" transform="translate(200)" opacity="1">
+    <line stroke="currentColor" y2="4"></line>
+    <text fill="currentColor" y="6" font-size="10" text-anchor="middle" dy="0.71em">100</text>
+    <rect fill="#fff" stroke="currentColor" stroke-width="0.5" width="0" height="4"></rect>
+  </g>
+  <text class="label" fill="currentColor" font-size="12" dy="-0.32em" x="0" text-anchor="start">Kilometers</text>
 </g>
 ```
 
