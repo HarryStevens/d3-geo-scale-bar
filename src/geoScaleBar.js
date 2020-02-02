@@ -3,7 +3,6 @@ import { default as geoDistance } from "./geo/distance";
 export default function(){
   let extent = null,
       projection,
-      height = 4,
       left = 0,
       top = 0,
       units = "kilometers",
@@ -11,9 +10,10 @@ export default function(){
       radius = 6371,
       tickValues,
       tickFormat = d => Math.round(d),
-      label,
+      tickSize = 4,
+      labelText,
       labelAnchor = "start",
-      scaleFactor = 1;
+      zoomFactor = 1;
 
   const unitPresets = {
         "miles": {
@@ -23,92 +23,126 @@ export default function(){
           radius: 6371
         }
       };
+
+  function inferDistance(extent, radius){
+    return Math.pow(10, countDigits(geoDistance(projection.invert(extent[0]), projection.invert([extent[1][0], extent[0][1]])) * radius) - 1);
+  }
+
+  function countDigits(num){
+    return Math.floor(num).toString().length;
+  }
+
+  function capitalizeFirstLetter(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
   
-  function scaleBar(context){
-    const barWidth = extent[1][0] - extent[0][0],
-          barHeight = extent[1][1] - extent[0][1];
+  function scaleBar(context){    
+    // If a distance has not been explicitly set, set it
+    distance = distance || inferDistance(extent, radius);
     
-    context.attr("width", barWidth).attr("height", barHeight);
+    // If a label has not been explicitly set, set it
+    labelText = labelText === null ? null : labelText || capitalizeFirstLetter(units);
     
-    const x = extent[0][0] + barWidth * left,
-          y = extent[0][1] + barHeight * top,
-          start = projection.invert([x, y]);
+    // The position, width, and ticks of the scale bar
+    let width = extent[1][0] - extent[0][0],
+        height = extent[1][1] - extent[0][1],
+        x = extent[0][0] + width * left,
+        y = extent[0][1] + height * top,
+        start = projection.invert([x, y]),
+        barWidth = distance / (geoDistance(start, projection.invert([x + 1, y])) * radius),
+        max = distance / zoomFactor,
+        values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
+        scale = dist => dist * barWidth / (distance / zoomFactor),
+        selection = context.selection ? context.selection() : context,
+        label = selection.selectAll(".label").data([labelText]),
+        path = selection.selectAll(".domain").data([null]),
+        tick = selection.selectAll(".tick").data(values, scale).order(),
+        tickExit = tick.exit(),
+        tickEnter = tick.enter().append("g").attr("class", "tick"),
+        line = tick.select("line"),
+        text = tick.select("text"),
+        rect = tick.select("rect");
     
-    distance = distance || Math.pow(10, countDigits(geoDistance(projection.invert(extent[0]), projection.invert([extent[1][0], extent[0][1]])) * radius) - 1);
-    
-    const w = distance / (geoDistance(start, projection.invert([x + 1, y])) * radius),
-          scale = dist => dist * w / (distance / scaleFactor),
-          tickMax = distance / scaleFactor,
-          ticks = tickValues === null ? [] : tickValues ? tickValues : [0, tickMax / 4, tickMax / 2, tickMax];
-    
-    let g = context.select("g")
-    if (!g._groups[0][0]) {
-      g = context.append("g");
-    }
-    g.attr("transform", `translate(${[x, y]})`);
-    
-    let baseline = g.select(".baseline")
-    if (!baseline._groups[0][0]) {
-      baseline = g.append("rect")
-          .attr("class", "baseline");
-    }
-    baseline
-        .attr("fill", "black")
-        .attr("height", height)
-        .attr("width", scale(tickMax));
-
-    const rects = g.selectAll(".rectangle")
-        .data(ticks.map((d, i, data) => [d, data[i + 1]]).filter((d, i, data) => i !== data.length - 1));
-
-    rects.exit().remove();
-
-    rects.enter().append("rect")
-        .attr("class", "rectangle")
-        .attr("height", height)
-        .attr("stroke", "#000")
-        .attr("fill", (d, i) => i % 2 === 0 ? "#000" : "#fff")
-      .merge(rects)
-        .attr("x", d => scale(d[0]))
-        .attr("width", d => scale(d[1] - d[0]));
-
-    const valueText = g.selectAll(".value")
-        .data(ticks);
-    
-    valueText.exit().remove();
-    
-    valueText.enter().append("text")
-        .attr("class", "value")
-        .attr("text-anchor", "middle")
+    selection
         .attr("font-family", "sans-serif")
-        .attr("font-size", 12)
-      .merge(valueText)
-        .attr("x", scale)
-        .attr("y", height + 11)
-        .text(tickFormat); 
+        .attr("transform", `translate(${[x, y]})`);
     
-    let labelText = g.select(".label");
-    if (!labelText._groups[0][0]){
-      labelText = g.append("text")
-          .attr("class", "label")
-    }
+    path = path.merge(path.enter().insert("path", ".tick")
+        .attr("class", "domain")
+        .attr("fill", "none")
+        .attr("stroke", "currentColor"));
+    
+    tick = tick.merge(tickEnter);
+    
+    line = line.merge(tickEnter.append("line")
+        .attr("stroke", "currentColor")
+        .attr("y2", tickSize));
+
+    text = text.merge(tickEnter.append("text")
+        .attr("fill", "currentColor")
+        .attr("y", tickSize + 2)
+        .attr("font-size", 10)
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.71em"));
+    
+    rect = rect.merge(tickEnter.append("rect")
+        .attr("fill", (d, i) => i % 2 === 0 ?  "currentColor" : "#fff")
+        .attr("stroke", "currentColor")
+        .attr("stroke-width", 0.5)
+        .attr("width", (d, i, e) => i === e.length - 1 ? 0 : scale(values[i + 1] - d))
+        .attr("height", tickSize));
+    
+    if (context !== selection){
+      tick = tick.transition(context);
+      path = path.transition(context);
+      rect = rect.transition(context);
       
-    if (label === null){
-      labelText.remove();
+      tickExit = tickExit.transition(context)
+          .attr("opacity", 1e-6)
+          .attr("transform", d => `translate(${scale(d)})`);
+      
+      tickEnter
+          .attr("opacity", 1e-6)
+          .attr("transform", d => `translate(${scale(d)})`);
+    }
+    
+    tickExit.remove();
+    
+    path
+        .attr("d", `M${scale(0)},${tickSize} L${scale(0)},0 L${scale(max)},0 L${scale(max)},${tickSize}`);
+    
+    tick
+        .attr("transform", d => `translate(${scale(d)})`)
+        .attr("opacity", 1);
+    
+    line
+        .attr("y2", tickSize);
+
+    text
+        .attr("y", tickSize + 2)
+        .text(tickFormat);
+    
+    rect
+        .attr("fill", (d, i) => i % 2 === 0 ?  "currentColor" : "#fff")
+        .attr("width", (d, i, e) => i === e.length - 1 ? 0 : scale(values[i + 1] - d))
+        .attr("height", tickSize);
+    
+    // The label
+    if (label === null) {
+      label.remove();
     }
     else {
-      label = label || capitalizeFirstLetter(units);
-      
-      labelText
-          .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(tickMax / 2) : scale(tickMax))
+      label.enter().append("text")
           .attr("class", "label")
-          .attr("fill", "#000")
+          .attr("fill", "currentColor")
+          .attr("font-size", 12)
+          .attr("dy", "-0.32em")
+        .merge(label)
+          .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max))
           .attr("text-anchor", labelAnchor)
-          .attr("font-size", 14)
-          .attr("font-family", "sans-serif")
-          .attr("y", -4)
-          .text(label);
+          .text(d => d);
     }
-    
+
   }
 
   scaleBar.extent = function(_) {
@@ -138,6 +172,14 @@ export default function(){
     }
   }
 
+  scaleBar.left = function(_) {
+    return arguments.length ? (left = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : left;
+  }
+
+  scaleBar.top = function(_) {
+    return arguments.length ? (top = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : top;
+  }
+  
   scaleBar.distance = function(_) {
     return arguments.length ? (distance = +_, scaleBar) : distance;
   }
@@ -153,37 +195,21 @@ export default function(){
   scaleBar.tickFormat = function(_) {
     return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
   }
+  
+  scaleBar.tickSize = function(_) {
+    return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
+  }
 
   scaleBar.label = function(_) {
-    return arguments.length ? (label = _, scaleBar) : label;
+    return arguments.length ? (labelText = _, scaleBar) : labelText;
   }
   
   scaleBar.labelAnchor = function(_) {
     return arguments.length ? (labelAnchor = _, scaleBar) : labelAnchor;
   }
 
-  scaleBar.height = function(_) {
-    return arguments.length ? (height = +_, scaleBar) : height;
-  }
-
-  scaleBar.left = function(_) {
-    return arguments.length ? (left = _ > 1 ? 1 : _ < 0 ? 0 : +_, scaleBar) : left;
-  }
-
-  scaleBar.top = function(_) {
-    return arguments.length ? (top = _ > 1 ? 1 : _ < 0 ? 0 : +_, scaleBar) : top;
-  }
-
-  scaleBar.scaleFactor = function(_) {
-    return arguments.length ? (scaleFactor = _, scaleBar) : scaleFactor;
-  }
-
-  function countDigits(_){
-    return Math.floor(_).toString().length;
-  }
-  
-  function capitalizeFirstLetter(_) {
-    return _.charAt(0).toUpperCase() + _.slice(1);
+  scaleBar.zoomFactor = function(_) {
+    return arguments.length ? (zoomFactor = +_, scaleBar) : zoomFactor;
   }
 
   return scaleBar;
