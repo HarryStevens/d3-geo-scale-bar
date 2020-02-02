@@ -24,7 +24,8 @@ const scaleBar = d3.geoScaleBar()
 d3.select("svg")
     .attr("width", width)
     .attr("height", height)
-  .append("g").call(scaleBar);
+  .append("g")
+    .call(scaleBar);
 
 </script>
 ```
