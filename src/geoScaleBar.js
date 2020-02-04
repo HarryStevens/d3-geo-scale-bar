@@ -24,22 +24,19 @@ export default function(){
         }
       };
 
-  function inferDistance(extent, radius){
-    return Math.pow(10, countDigits(geoDistance(projection.invert(extent[0]), projection.invert([extent[1][0], extent[0][1]])) * radius) - 1);
-  }
-
-  function countDigits(num){
-    return Math.floor(num).toString().length;
-  }
-
   function capitalizeFirstLetter(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
   
+  function countDigits(num){
+    return Math.floor(num).toString().length;
+  }
+  
+  function inferDistance(extent, radius, divisor){
+    return Math.pow(10, countDigits(geoDistance(projection.invert(extent[0]), projection.invert([extent[1][0], extent[0][1]])) * radius / divisor) - 1);
+  }
+  
   function scaleBar(context){    
-    // If a distance has not been explicitly set, set it
-    const barDistance = distance || inferDistance(extent, radius);
-    
     // If a label has not been explicitly set, set it
     labelText = labelText === null ? null : labelText || capitalizeFirstLetter(units);
     
@@ -48,9 +45,27 @@ export default function(){
         height = extent[1][1] - extent[0][1],
         x = extent[0][0] + width * left,
         y = extent[0][1] + height * top,
-        start = projection.invert([x, y]),
-        barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius),
-        max = barDistance / zoomFactor,
+        start = projection.invert([x, y]);
+    
+    // If the distance has been set explicitly
+    let barDistance = 0, barWidth = 0;
+    if (distance){
+      barDistance = distance;
+      barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
+    }
+    // Otherwise, make it an exponent of 10 with a minimum width of 40px 
+    else {
+      let divisor = 4, minWidth = 40;
+      
+      while (barWidth < minWidth){
+        barDistance = inferDistance(extent, radius, divisor);
+        barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);        
+        divisor -= 0.1;
+      }      
+    }
+    
+    // The values and elements of the scale bar
+    let max = barDistance / zoomFactor,
         values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
         scale = dist => dist * barWidth / (barDistance / zoomFactor),
         selection = context.selection ? context.selection() : context,
