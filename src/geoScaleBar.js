@@ -38,7 +38,7 @@ export default function(){
   
   function scaleBar(context){    
     // If a distance has not been explicitly set, set it
-    distance = distance || inferDistance(extent, radius);
+    const barDistance = distance || inferDistance(extent, radius);
     
     // If a label has not been explicitly set, set it
     labelText = labelText === null ? null : labelText || capitalizeFirstLetter(units);
@@ -49,10 +49,10 @@ export default function(){
         x = extent[0][0] + width * left,
         y = extent[0][1] + height * top,
         start = projection.invert([x, y]),
-        barWidth = distance / (geoDistance(start, projection.invert([x + 1, y])) * radius),
-        max = distance / zoomFactor,
+        barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius),
+        max = barDistance / zoomFactor,
         values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
-        scale = dist => dist * barWidth / (distance / zoomFactor),
+        scale = dist => dist * barWidth / (barDistance / zoomFactor),
         selection = context.selection ? context.selection() : context,
         label = selection.selectAll(".label").data([labelText]),
         path = selection.selectAll(".domain").data([null]),
