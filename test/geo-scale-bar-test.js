@@ -35,7 +35,7 @@ tape("scaleBar(selection) produces the expected result", function(test) {
   const india = JSON.parse(file("india.json"));
   const size = [900, 600];
   const projection = d3.geoMercator().fitSize(size, india);
-  const s = d3.geoScaleBar().size(size).projection(projection);
+  const s = d3.geoScaleBar().size(size).projection(projection).distance(1000);
   const svg = d3.select(bodyActual).select("svg").attr("width", size[0]).attr("height", size[1]);
   svg.append("g").call(s);
   test.equal(bodyActual.outerHTML, bodyExpected.outerHTML);

@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.5.3. Copyright 2020 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.5.4. Copyright 2020 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -243,21 +243,9 @@
       }
     };
 
-    function capitalizeFirstLetter(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    function countDigits(num) {
-      return Math.floor(num).toString().length;
-    }
-
-    function inferDistance(extent, radius, divisor) {
-      return Math.pow(10, countDigits(geoDistance(projection.invert(extent[0]), projection.invert([extent[1][0], extent[0][1]])) * radius / divisor) - 1);
-    }
-
     function scaleBar(context) {
       // If a label has not been explicitly set, set it
-      labelText = labelText === null ? null : labelText || capitalizeFirstLetter(units); // The position, width, and ticks of the scale bar
+      labelText = labelText === null ? null : labelText || units.charAt(0).toUpperCase() + units.slice(1); // The position, width, and ticks of the scale bar
 
       var width = extent[1][0] - extent[0][0],
           height = extent[1][1] - extent[0][1],
@@ -271,18 +259,27 @@
       if (distance) {
         barDistance = distance;
         barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-      } // Otherwise, make it an exponent of 10 with a minimum width of 40px 
+      } // Otherwise, make it an exponent of 10 or 10 * 4 with a minimum width of 60px
       else {
-          var divisor = 4,
-              minWidth = 40;
+          var dist = .01,
+              minWidth = 60,
+              iters = 0,
+              maxiters = 100;
 
-          while (barWidth < minWidth) {
-            barDistance = inferDistance(extent, radius, divisor);
+          while (barWidth < minWidth && iters < maxiters) {
+            barDistance = dist;
             barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-            divisor -= 0.1;
-          }
-        } // The values and elements of the scale bar
 
+            if (barWidth >= minWidth) {
+              break;
+            }
+
+            barDistance = dist * 4;
+            barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
+            dist *= 10;
+            iters++;
+          }
+        }
 
       var max = barDistance / zoomFactor,
           values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
