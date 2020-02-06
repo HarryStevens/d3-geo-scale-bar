@@ -1,4 +1,5 @@
 import { default as geoDistance } from "./geo/distance";
+import { default as geoScaleBottom } from "./orient/bottom.js"
 
 export default function(){
   let extent = null,
@@ -13,7 +14,8 @@ export default function(){
       tickSize = 4,
       labelText,
       labelAnchor = "start",
-      zoomFactor = 1;
+      zoomFactor = 1,
+      orient = geoScaleBottom();
 
   const unitPresets = {
         "miles": {
@@ -41,7 +43,7 @@ export default function(){
       barDistance = distance;
       barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
     }
-    // Otherwise, make it an exponent of 10 or 10 * 4 with a minimum width of 60px
+    // Otherwise, make it an exponent of 10 with a minimum width of 40px 
     else {
       let dist = .01, minWidth = 60, iters = 0, maxiters = 100;
       
@@ -82,20 +84,21 @@ export default function(){
     
     line = line.merge(tickEnter.append("line")
         .attr("stroke", "currentColor")
-        .attr("y2", tickSize));
+        .attr("y2", tickSize * orient));
 
     text = text.merge(tickEnter.append("text")
         .attr("fill", "currentColor")
-        .attr("y", tickSize + 2)
+        .attr("y", tickSize * orient + 2)
         .attr("font-size", 10)
         .attr("text-anchor", "middle")
-        .attr("dy", "0.71em"));
+        .attr("dy", `${orient === 1 ? 0.71 : -0.35}em`));
     
     rect = rect.merge(tickEnter.append("rect")
         .attr("fill", (d, i) => i % 2 === 0 ?  "currentColor" : "#fff")
         .attr("stroke", "currentColor")
         .attr("stroke-width", 0.5)
         .attr("width", (d, i, e) => i === e.length - 1 ? 0 : scale(values[i + 1] - d))
+        .attr("y", orient === 1 ? 0 : -tickSize)
         .attr("height", tickSize));
     
     if (context !== selection){
@@ -115,22 +118,23 @@ export default function(){
     tickExit.remove();
     
     path
-        .attr("d", `M${scale(0)},${tickSize} L${scale(0)},0 L${scale(max)},0 L${scale(max)},${tickSize}`);
+        .attr("d", `M${scale(0)},${tickSize * orient} L${scale(0)},0 L${scale(max)},0 L${scale(max)},${tickSize * orient}`);
     
     tick
         .attr("transform", d => `translate(${scale(d)})`)
         .attr("opacity", 1);
     
     line
-        .attr("y2", tickSize);
+        .attr("y2", tickSize * orient);
 
     text
-        .attr("y", tickSize + 2)
+        .attr("y", tickSize * orient + 2)
         .text(tickFormat);
     
     rect
         .attr("fill", (d, i) => i % 2 === 0 ?  "currentColor" : "#fff")
         .attr("width", (d, i, e) => i === e.length - 1 ? 0 : scale(values[i + 1] - d))
+        .attr("y", orient === 1 ? 0 : -tickSize)
         .attr("height", tickSize);
     
     // The label
@@ -145,53 +149,51 @@ export default function(){
           .attr("dy", "-0.32em")
         .merge(label)
           .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max))
+          .attr("y", orient === 1 ? 0 : "1.3em")
           .attr("text-anchor", labelAnchor)
           .text(d => d);
     }
 
   }
 
+  scaleBar.distance = function(_) {
+    return arguments.length ? (distance = +_, scaleBar) : distance;
+  }
+  
   scaleBar.extent = function(_) {
     return arguments.length ? (extent = _, scaleBar) : extent;
+  }
+  
+  scaleBar.label = function(_) {
+    return arguments.length ? (labelText = _, scaleBar) : labelText;
+  }
+  
+  scaleBar.labelAnchor = function(_) {
+    return arguments.length ? (labelAnchor = _, scaleBar) : labelAnchor;
+  }
+  
+  scaleBar.left = function(_) {
+    return arguments.length ? (left = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : left;
+  }
+  
+  scaleBar.orient = function(_) {
+    return arguments.length ? (orient = _(), scaleBar) : (orient === 1 ? "bottom" : "top");
+  }
+  
+  scaleBar.projection = function(_) {
+    return arguments.length ? (projection = _, scaleBar) : projection;
+  }
+  
+  scaleBar.radius = function(_) {
+    return arguments.length ? (radius = +_, scaleBar) : radius;
   }
   
   scaleBar.size = function(_) {
     return arguments.length ? (extent = [[0, 0], _], scaleBar) : extent[1];
   }
 
-  scaleBar.projection = function(_) {
-    return arguments.length ? (projection = _, scaleBar) : projection;
-  }
-
-  scaleBar.units = function(_){
-    if (arguments.length) {
-      units = _;
-      if (Object.keys(unitPresets).includes(_)) {
-        radius = unitPresets[_].radius;
-      }
-
-      return scaleBar; 
-    }
-
-    else {
-      return units;
-    }
-  }
-
-  scaleBar.left = function(_) {
-    return arguments.length ? (left = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : left;
-  }
-
   scaleBar.top = function(_) {
     return arguments.length ? (top = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : top;
-  }
-  
-  scaleBar.distance = function(_) {
-    return arguments.length ? (distance = +_, scaleBar) : distance;
-  }
-
-  scaleBar.radius = function(_) {
-    return arguments.length ? (radius = +_, scaleBar) : radius;
   }
 
   scaleBar.tickValues = function(_) {
@@ -205,13 +207,20 @@ export default function(){
   scaleBar.tickSize = function(_) {
     return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
   }
-
-  scaleBar.label = function(_) {
-    return arguments.length ? (labelText = _, scaleBar) : labelText;
-  }
   
-  scaleBar.labelAnchor = function(_) {
-    return arguments.length ? (labelAnchor = _, scaleBar) : labelAnchor;
+  scaleBar.units = function(_){
+    if (arguments.length) {
+      units = _;
+      if (Object.keys(unitPresets).includes(_)) {
+        radius = unitPresets[_].radius;
+      }
+
+      return scaleBar; 
+    }
+
+    else {
+      return units;
+    }
   }
 
   scaleBar.zoomFactor = function(_) {

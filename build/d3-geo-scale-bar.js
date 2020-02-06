@@ -217,6 +217,10 @@
     return length(object);
   }
 
+  function geoScaleBottom () {
+    return 1;
+  }
+
   function geoScaleBar () {
     var extent = null,
         projection,
@@ -232,7 +236,8 @@
         tickSize = 4,
         labelText,
         labelAnchor = "start",
-        zoomFactor = 1;
+        zoomFactor = 1,
+        orient = geoScaleBottom();
 
     var unitPresets = {
       "miles": {
@@ -259,7 +264,7 @@
       if (distance) {
         barDistance = distance;
         barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-      } // Otherwise, make it an exponent of 10 or 10 * 4 with a minimum width of 60px
+      } // Otherwise, make it an exponent of 10 with a minimum width of 40px 
       else {
           var dist = .01,
               minWidth = 60,
@@ -299,13 +304,13 @@
       selection.attr("font-family", "sans-serif").attr("transform", "translate(".concat([x, y], ")"));
       path = path.merge(path.enter().insert("path", ".tick").attr("class", "domain").attr("fill", "none").attr("stroke", "currentColor"));
       tick = tick.merge(tickEnter);
-      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr("y2", tickSize));
-      text = text.merge(tickEnter.append("text").attr("fill", "currentColor").attr("y", tickSize + 2).attr("font-size", 10).attr("text-anchor", "middle").attr("dy", "0.71em"));
+      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr("y2", tickSize * orient));
+      text = text.merge(tickEnter.append("text").attr("fill", "currentColor").attr("y", tickSize * orient + 2).attr("font-size", 10).attr("text-anchor", "middle").attr("dy", "".concat(orient === 1 ? 0.71 : -0.35, "em")));
       rect = rect.merge(tickEnter.append("rect").attr("fill", function (d, i) {
         return i % 2 === 0 ? "currentColor" : "#fff";
       }).attr("stroke", "currentColor").attr("stroke-width", 0.5).attr("width", function (d, i, e) {
         return i === e.length - 1 ? 0 : scale(values[i + 1] - d);
-      }).attr("height", tickSize));
+      }).attr("y", orient === 1 ? 0 : -tickSize).attr("height", tickSize));
 
       if (context !== selection) {
         tick = tick.transition(context);
@@ -320,37 +325,77 @@
       }
 
       tickExit.remove();
-      path.attr("d", "M".concat(scale(0), ",").concat(tickSize, " L").concat(scale(0), ",0 L").concat(scale(max), ",0 L").concat(scale(max), ",").concat(tickSize));
+      path.attr("d", "M".concat(scale(0), ",").concat(tickSize * orient, " L").concat(scale(0), ",0 L").concat(scale(max), ",0 L").concat(scale(max), ",").concat(tickSize * orient));
       tick.attr("transform", function (d) {
         return "translate(".concat(scale(d), ")");
       }).attr("opacity", 1);
-      line.attr("y2", tickSize);
-      text.attr("y", tickSize + 2).text(tickFormat);
+      line.attr("y2", tickSize * orient);
+      text.attr("y", tickSize * orient + 2).text(tickFormat);
       rect.attr("fill", function (d, i) {
         return i % 2 === 0 ? "currentColor" : "#fff";
       }).attr("width", function (d, i, e) {
         return i === e.length - 1 ? 0 : scale(values[i + 1] - d);
-      }).attr("height", tickSize); // The label
+      }).attr("y", orient === 1 ? 0 : -tickSize).attr("height", tickSize); // The label
 
       if (label === null) {
         label.remove();
       } else {
-        label.enter().append("text").attr("class", "label").attr("fill", "currentColor").attr("font-size", 12).attr("dy", "-0.32em").merge(label).attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max)).attr("text-anchor", labelAnchor).text(function (d) {
+        label.enter().append("text").attr("class", "label").attr("fill", "currentColor").attr("font-size", 12).attr("dy", "-0.32em").merge(label).attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max)).attr("y", orient === 1 ? 0 : "1.3em").attr("text-anchor", labelAnchor).text(function (d) {
           return d;
         });
       }
     }
 
+    scaleBar.distance = function (_) {
+      return arguments.length ? (distance = +_, scaleBar) : distance;
+    };
+
     scaleBar.extent = function (_) {
       return arguments.length ? (extent = _, scaleBar) : extent;
+    };
+
+    scaleBar.label = function (_) {
+      return arguments.length ? (labelText = _, scaleBar) : labelText;
+    };
+
+    scaleBar.labelAnchor = function (_) {
+      return arguments.length ? (labelAnchor = _, scaleBar) : labelAnchor;
+    };
+
+    scaleBar.left = function (_) {
+      return arguments.length ? (left = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : left;
+    };
+
+    scaleBar.orient = function (_) {
+      return arguments.length ? (orient = _(), scaleBar) : orient === 1 ? "bottom" : "top";
+    };
+
+    scaleBar.projection = function (_) {
+      return arguments.length ? (projection = _, scaleBar) : projection;
+    };
+
+    scaleBar.radius = function (_) {
+      return arguments.length ? (radius = +_, scaleBar) : radius;
     };
 
     scaleBar.size = function (_) {
       return arguments.length ? (extent = [[0, 0], _], scaleBar) : extent[1];
     };
 
-    scaleBar.projection = function (_) {
-      return arguments.length ? (projection = _, scaleBar) : projection;
+    scaleBar.top = function (_) {
+      return arguments.length ? (top = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : top;
+    };
+
+    scaleBar.tickValues = function (_) {
+      return arguments.length ? (tickValues = _, scaleBar) : tickValues;
+    };
+
+    scaleBar.tickFormat = function (_) {
+      return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
+    };
+
+    scaleBar.tickSize = function (_) {
+      return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
     };
 
     scaleBar.units = function (_) {
@@ -367,42 +412,6 @@
       }
     };
 
-    scaleBar.left = function (_) {
-      return arguments.length ? (left = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : left;
-    };
-
-    scaleBar.top = function (_) {
-      return arguments.length ? (top = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : top;
-    };
-
-    scaleBar.distance = function (_) {
-      return arguments.length ? (distance = +_, scaleBar) : distance;
-    };
-
-    scaleBar.radius = function (_) {
-      return arguments.length ? (radius = +_, scaleBar) : radius;
-    };
-
-    scaleBar.tickValues = function (_) {
-      return arguments.length ? (tickValues = _, scaleBar) : tickValues;
-    };
-
-    scaleBar.tickFormat = function (_) {
-      return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
-    };
-
-    scaleBar.tickSize = function (_) {
-      return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
-    };
-
-    scaleBar.label = function (_) {
-      return arguments.length ? (labelText = _, scaleBar) : labelText;
-    };
-
-    scaleBar.labelAnchor = function (_) {
-      return arguments.length ? (labelAnchor = _, scaleBar) : labelAnchor;
-    };
-
     scaleBar.zoomFactor = function (_) {
       return arguments.length ? (zoomFactor = +_, scaleBar) : zoomFactor;
     };
@@ -410,7 +419,13 @@
     return scaleBar;
   }
 
+  function top () {
+    return -1;
+  }
+
   exports.geoScaleBar = geoScaleBar;
+  exports.geoScaleBottom = geoScaleBottom;
+  exports.geoScaleTop = top;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

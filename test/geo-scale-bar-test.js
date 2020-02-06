@@ -15,6 +15,16 @@ tape("geoScaleBar() has the expected defaults", function(test) {
   test.end();
 });
 
+tape("Orientation methods are exported", function(test) {
+  test.equal(d3.geoScaleBottom(), 1);
+  test.equal(d3.geoScaleTop(), -1);
+  const s = d3.geoScaleBar().orient(d3.geoScaleBottom);
+  test.equal(s.orient(), "bottom");
+  s.orient(d3.geoScaleTop);
+  test.equal(s.orient(), "top");
+  test.end();
+});
+
 tape("scaleBar.extent(extent) sets the extent explicitly", function(test) {
   const s = d3.geoScaleBar().extent([[0, 0], [100, 100]]);
   test.deepEqual(s.extent(), [[0, 0], [100, 100]]);
