@@ -221,14 +221,19 @@
     return 1;
   }
 
+  var geoScaleKilometers = {
+    units: "kilometers",
+    radius: 6371.0088
+  };
+
   function geoScaleBar () {
     var extent = null,
         projection,
         left = 0,
         top = 0,
-        units = "kilometers",
+        units = geoScaleKilometers.units,
         distance,
-        radius = 6371,
+        radius = geoScaleKilometers.radius,
         tickValues,
         tickFormat = function tickFormat(d) {
       return Math.round(d);
@@ -238,15 +243,6 @@
         labelAnchor = "start",
         zoomFactor = 1,
         orient = geoScaleBottom();
-
-    var unitPresets = {
-      "miles": {
-        radius: 3959
-      },
-      "kilometers": {
-        radius: 6371
-      }
-    };
 
     function scaleBar(context) {
       // If a label has not been explicitly set, set it
@@ -399,17 +395,9 @@
     };
 
     scaleBar.units = function (_) {
-      if (arguments.length) {
-        units = _;
+      var _ref;
 
-        if (Object.keys(unitPresets).includes(_)) {
-          radius = unitPresets[_].radius;
-        }
-
-        return scaleBar;
-      } else {
-        return units;
-      }
+      return arguments.length ? ((_ref = _, units = _ref.units, radius = _ref.radius, _ref), scaleBar) : units;
     };
 
     scaleBar.zoomFactor = function (_) {
@@ -423,9 +411,28 @@
     return -1;
   }
 
+  var feet = {
+    units: "feet",
+    radius: 20902259.664
+  };
+
+  var meters = {
+    units: "meters",
+    radius: 6371008.8
+  };
+
+  var miles = {
+    units: "miles",
+    radius: 3958.7613
+  };
+
   exports.geoScaleBar = geoScaleBar;
   exports.geoScaleBottom = geoScaleBottom;
   exports.geoScaleTop = top;
+  exports.geoScaleFeet = feet;
+  exports.geoScaleKilometers = geoScaleKilometers;
+  exports.geoScaleMeters = meters;
+  exports.geoScaleMiles = miles;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

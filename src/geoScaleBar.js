@@ -1,14 +1,15 @@
 import { default as geoDistance } from "./geo/distance";
-import { default as geoScaleBottom } from "./orient/bottom.js"
+import { default as geoScaleBottom } from "./orient/bottom";
+import { default as geoScaleKilometers } from "./units/kilometers";
 
 export default function(){
   let extent = null,
       projection,
       left = 0,
       top = 0,
-      units = "kilometers",
+      units = geoScaleKilometers.units,
       distance,
-      radius = 6371,
+      radius = geoScaleKilometers.radius,
       tickValues,
       tickFormat = d => Math.round(d),
       tickSize = 4,
@@ -16,15 +17,6 @@ export default function(){
       labelAnchor = "start",
       zoomFactor = 1,
       orient = geoScaleBottom();
-
-  const unitPresets = {
-        "miles": {
-          radius: 3959
-        },
-        "kilometers": {
-          radius: 6371
-        }
-      };
 
   function scaleBar(context){    
     // If a label has not been explicitly set, set it
@@ -208,21 +200,10 @@ export default function(){
     return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
   }
   
-  scaleBar.units = function(_){
-    if (arguments.length) {
-      units = _;
-      if (Object.keys(unitPresets).includes(_)) {
-        radius = unitPresets[_].radius;
-      }
-
-      return scaleBar; 
-    }
-
-    else {
-      return units;
-    }
+  scaleBar.units = function(_) {
+    return arguments.length ? ({units, radius} = _, scaleBar) : units;
   }
-
+  
   scaleBar.zoomFactor = function(_) {
     return arguments.length ? (zoomFactor = +_, scaleBar) : zoomFactor;
   }

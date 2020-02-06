@@ -11,7 +11,7 @@ In cartography, scale bars help viewers understand the geographic extent of maps
 If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest release](https://github.com/HarryStevens/d3-geo-scale-bar/raw/master/build/d3-geo-scale-bar.zip). AMD, CommonJS, and vanilla environments are supported. In vanilla, a d3 global is exported:
 
 ```html
-<script src="https://unpkg.com/d3-geo-scale-bar@0.6.0/build/d3-geo-scale-bar.min.js"></script>
+<script src="https://unpkg.com/d3-geo-scale-bar@0.7.0/build/d3-geo-scale-bar.min.js"></script>
 <script>
 
 const projection = d3.geoMercator()
@@ -124,15 +124,33 @@ If *top* is specified, sets the top position to the specified value which must b
 
 <a name="scaleBar_distance" href="#scaleBar_distance">#</a> <i>scaleBar</i>.<b>distance</b>([<i>distance</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L114 "Source")
 
-If *distance* is specifed, sets the maxiumum distance of the scale bar in the scale bar's units. Defaults to the largest exponent of 10 that will fit on the map. If *distance* is not specified, returns the current maximum distance of the scale bar.
+If <i>distance</i> is specifed, sets the maxiumum distance of the scale bar in the scale bar's units. Defaults to the largest exponent of 10 that will fit on the map. If <i>distance</i> is not specified, returns the current maximum distance of the scale bar.
 
 <a name="scaleBar_radius" href="#scaleBar_radius">#</a> <i>scaleBar</i>.<b>radius</b>([<i>radius</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L118 "Source")
 
-If *radius* is specifed, sets the radius of the sphere on which the geospatial data is projected. Defaults to 6,371, [the radius of the Earth](https://www.google.com/search?q=radius+of+earth+in+kilometers). If you set [*units*]("#scaleBar_units") to "miles", the *radius* will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can set the *radius* to any number you like, useful for mapping planets other than Earth. If *radius* is not specified, returns the current radius.
+If <i>radius</i> is specifed, sets the radius of the sphere on which the geospatial data is projected. Defaults to 6371.0088, [the mean radius of Earth in kilometers](https://en.wikipedia.org/wiki/Earth_radius#Mean_radius). If you set [<i>units</i>](#scaleBar_units) to d3.geoScaleMiles, the <i>radius</i> will also update to 3958.7613, [the mean radius of Earth in miles](https://en.wikipedia.org/wiki/Earth_radius#Mean_radius). You can set the *radius* to any number you like, useful for mapping planets other than Earth. If *radius* is not specified, returns the current radius.
 
 <a name="scaleBar_units" href="#scaleBar_units">#</a> <i>scaleBar</i>.<b>units</b>([<i>units</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L99 "Source")
 
-If a *units* string is specifed, sets the units of the scale bar. Defaults to "kilometers". If you set *units* to "miles", the [*radius*]("#scaleBar_radius") will also update to 3,959, [the number of miles of Earth's radius](https://www.google.com/search?q=radius+of+earth+in+miles). You can override this if you are mapping planets other than Earth. If *units* is not specified, returns the current units string.
+If <i>units</i> is specifed, sets the [radius](#scaleBar_radius) of the scale bar to the corresponding units and returns the scale bar. Defaults to d3.geoScaleKilometers, which sets the label to "Kilometers" and the radius to 6371.0088, [the mean radius of Earth in kilometers](https://en.wikipedia.org/wiki/Earth_radius#Mean_radius). Note that the Earth's radius varies depending upon latitude, so if extremely high precision matters, you can [perform your own calculation of the radius](https://web.archive.org/web/20200118181437/https://rechneronline.de/earth-radius/) and pass the output to <i>scaleBar</i>.[radius](#scaleBar_radius).
+
+If <i>units</i> is not specified, returns a string representing the current unit, e.g. "kilometers". The capitalized version of this string will be used for the [label](#scaleBar_label) if no label is specified.
+
+<a name="geoScaleFeet" href="#geoScaleFeet">#</a> d3.<b>geoScaleFeet</b>() [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/units/feet.js "Source")
+
+When passed to <i>scaleBar</i>.[units](#scaleBar_units), sets the [radius](scaleBar_radius) to 20902259.664, the mean radius of Earth in feet. The [label](#scaleBar_label) will be set to "Feet" if no label is specified.
+
+<a name="geoScaleKilometers" href="#geoScaleKilometers">#</a> d3.<b>geoScaleKilometers</b>() [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/units/kilometers.js "Source")
+
+When passed to <i>scaleBar</i>.[units](#scaleBar_units), sets the [radius](scaleBar_radius) to 6371.0088, the mean radius of Earth in kilometers. The [label](#scaleBar_label) will be set to "Kilometers" if no label is specified.
+
+<a name="geoScaleMeters" href="#geoScaleMeters">#</a> d3.<b>geoScaleMeters</b>() [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/units/meters.js "Source")
+
+When passed to <i>scaleBar</i>.[units](#scaleBar_units), sets the [radius](scaleBar_radius) to 6371008.8, the mean radius of Earth in meters. The [label](#scaleBar_label) will be set to "Meters" if no label is specified.
+
+<a name="geoScaleMiles" href="#geoScaleMiles">#</a> d3.<b>geoScaleMiles</b>() [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/units/miles.js "Source")
+
+When passed to <i>scaleBar</i>.[units](#scaleBar_units), sets the [radius](scaleBar_radius) to 3958.7613, the mean radius of Earth in miles. The [label](#scaleBar_label) will be set to "Miles" if no label is specified.
 
 ### Styling
 
@@ -146,7 +164,7 @@ If an <i>anchor</i> string is specified, aligns the scale bar's label such that 
 
 <a name="scaleBar_orient" href="#scaleBar_orient">#</a> <i>scaleBar</i>.<b>orient</b>([<i>orientation</i>]) [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/geoScaleBar.js#L126 "Source")
 
-If an [<i>orientation</i>](#geoScaleBottom) is specified, styles the bar according to the specified orientation and returns the scale bar. If an <i>orientation</i> is not specified, returns the current orientation as a string, either "top" or "bottom". Defaults to "bottom".
+If an [<i>orientation</i>](#geoScaleBottom) is specified, styles the bar according to the specified orientation and returns the scale bar. If an <i>orientation</i> is not specified, returns the current orientation as a string, either "top" or "bottom". Defaults to [d3.geoScaleBottom](#geoScaleBottom).
 
 <a name="geoScaleBottom" href="#geoScaleBottom">#</a> d3.<b>geoScaleBottom</b>() [<>](https://github.com/HarryStevens/d3-geo-scale-bar/blob/master/src/orient/bottom.js "Source")
 
