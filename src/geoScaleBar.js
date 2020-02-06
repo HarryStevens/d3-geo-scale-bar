@@ -187,10 +187,6 @@ export default function(){
   scaleBar.top = function(_) {
     return arguments.length ? (top = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : top;
   }
-
-  scaleBar.tickValues = function(_) {
-    return arguments.length ? (tickValues = _, scaleBar) : tickValues;
-  }
   
   scaleBar.tickFormat = function(_) {
     return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
@@ -198,6 +194,10 @@ export default function(){
   
   scaleBar.tickSize = function(_) {
     return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
+  }
+
+  scaleBar.tickValues = function(_) {
+    return arguments.length ? (tickValues = _, scaleBar) : tickValues;
   }
   
   scaleBar.units = function(_) {
