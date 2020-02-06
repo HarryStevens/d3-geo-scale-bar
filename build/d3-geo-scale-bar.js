@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.7.0. Copyright 2020 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 0.7.1. Copyright 2020 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -382,16 +382,16 @@
       return arguments.length ? (top = +_ > 1 ? 1 : +_ < 0 ? 0 : +_, scaleBar) : top;
     };
 
-    scaleBar.tickValues = function (_) {
-      return arguments.length ? (tickValues = _, scaleBar) : tickValues;
-    };
-
     scaleBar.tickFormat = function (_) {
       return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
     };
 
     scaleBar.tickSize = function (_) {
       return arguments.length ? (tickSize = +_, scaleBar) : tickSize;
+    };
+
+    scaleBar.tickValues = function (_) {
+      return arguments.length ? (tickValues = _, scaleBar) : tickValues;
     };
 
     scaleBar.units = function (_) {
