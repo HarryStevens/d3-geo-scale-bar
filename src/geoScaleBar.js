@@ -22,7 +22,7 @@ export default function(){
     // If a label has not been explicitly set, set it
     labelText = labelText === null ? null : labelText || units.charAt(0).toUpperCase() + units.slice(1);
     
-    // The position, width, and ticks of the scale bar
+    // The position and width of the scale bar
     let width = extent[1][0] - extent[0][0],
         height = extent[1][1] - extent[0][1],
         x = extent[0][0] + width * left,
@@ -42,7 +42,7 @@ export default function(){
       while (barWidth < minWidth && iters < maxiters){
         barDistance = dist;
         barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-        if (barWidth >= minWidth) {break;}
+        if (barWidth >= minWidth) break;
         barDistance = dist * 4;
         barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
         dist *= 10;
@@ -50,6 +50,7 @@ export default function(){
       }
     }
     
+    // The ticks and elements of the bar
     let max = barDistance / zoomFactor,
         values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
         scale = dist => dist * barWidth / (barDistance / zoomFactor),

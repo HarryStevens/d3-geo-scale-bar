@@ -246,7 +246,7 @@
 
     function scaleBar(context) {
       // If a label has not been explicitly set, set it
-      labelText = labelText === null ? null : labelText || units.charAt(0).toUpperCase() + units.slice(1); // The position, width, and ticks of the scale bar
+      labelText = labelText === null ? null : labelText || units.charAt(0).toUpperCase() + units.slice(1); // The position and width of the scale bar
 
       var width = extent[1][0] - extent[0][0],
           height = extent[1][1] - extent[0][1],
@@ -270,17 +270,14 @@
           while (barWidth < minWidth && iters < maxiters) {
             barDistance = dist;
             barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-
-            if (barWidth >= minWidth) {
-              break;
-            }
-
+            if (barWidth >= minWidth) break;
             barDistance = dist * 4;
             barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
             dist *= 10;
             iters++;
           }
-        }
+        } // The ticks and elements of the bar
+
 
       var max = barDistance / zoomFactor,
           values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
