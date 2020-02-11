@@ -42,7 +42,5 @@
     "tape": "4",
     "uglify-js": "^2.8.11"
   },
-  "dependencies": {
-    "d3-format": "^1.4.2"
-  }
+  "dependencies": {}
 }

@@ -260,7 +260,7 @@
       if (distance) {
         barDistance = distance;
         barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-      } // Otherwise, make it an exponent of 10 with a minimum width of 40px 
+      } // Otherwise, make it an exponent of 10 or 10x4 with a minimum width of 60px 
       else {
           var dist = .01,
               minWidth = 60,
