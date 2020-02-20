@@ -8,9 +8,10 @@ tape("geoScaleBar() has the expected defaults", function(test) {
   const s = d3.geoScaleBar();
   test.equal(s.units(), "kilometers");
   test.equal(s.radius(), 6371.0088);
-  test.equal(s.tickSize(), 4);
   test.equal(s.left(), 0);
   test.equal(s.top(), 0);
+  test.equal(s.tickPadding(), 2);
+  test.equal(s.tickSize(), 4);
   test.equal(s.zoomFactor(), 1);
   test.end();
 });

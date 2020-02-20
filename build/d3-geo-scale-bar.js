@@ -231,18 +231,19 @@
         projection,
         left = 0,
         top = 0,
+        orient = geoScaleBottom(),
+        radius = geoScaleKilometers.radius,
         units = geoScaleKilometers.units,
         distance,
-        radius = geoScaleKilometers.radius,
-        tickValues,
         tickFormat = function tickFormat(d) {
       return Math.round(d);
     },
+        tickPadding = 2,
         tickSize = 4,
+        tickValues,
         labelText,
         labelAnchor = "start",
-        zoomFactor = 1,
-        orient = geoScaleBottom();
+        zoomFactor = 1;
 
     function scaleBar(context) {
       // If a label has not been explicitly set, set it
@@ -298,7 +299,7 @@
       path = path.merge(path.enter().insert("path", ".tick").attr("class", "domain").attr("fill", "none").attr("stroke", "currentColor"));
       tick = tick.merge(tickEnter);
       line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr("y2", tickSize * orient));
-      text = text.merge(tickEnter.append("text").attr("fill", "currentColor").attr("y", tickSize * orient + 2).attr("font-size", 10).attr("text-anchor", "middle").attr("dy", "".concat(orient === 1 ? 0.71 : -0.35, "em")));
+      text = text.merge(tickEnter.append("text").attr("fill", "currentColor").attr("y", tickSize * orient + tickPadding * orient).attr("font-size", 10).attr("text-anchor", "middle").attr("dy", "".concat(orient === 1 ? 0.71 : 0, "em")));
       rect = rect.merge(tickEnter.append("rect").attr("fill", function (d, i) {
         return i % 2 === 0 ? "currentColor" : "#fff";
       }).attr("stroke", "currentColor").attr("stroke-width", 0.5).attr("width", function (d, i, e) {
@@ -323,7 +324,7 @@
         return "translate(".concat(scale(d), ")");
       }).attr("opacity", 1);
       line.attr("y2", tickSize * orient);
-      text.attr("y", tickSize * orient + 2).text(tickFormat);
+      text.attr("y", tickSize * orient + tickPadding * orient).text(tickFormat);
       rect.attr("fill", function (d, i) {
         return i % 2 === 0 ? "currentColor" : "#fff";
       }).attr("width", function (d, i, e) {
@@ -381,6 +382,10 @@
 
     scaleBar.tickFormat = function (_) {
       return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
+    };
+
+    scaleBar.tickPadding = function (_) {
+      return arguments.length ? (tickPadding = +_, scaleBar) : tickPadding;
     };
 
     scaleBar.tickSize = function (_) {

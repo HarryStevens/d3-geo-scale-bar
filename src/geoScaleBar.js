@@ -7,16 +7,17 @@ export default function(){
       projection,
       left = 0,
       top = 0,
+      orient = geoScaleBottom(),
+      radius = geoScaleKilometers.radius,
       units = geoScaleKilometers.units,
       distance,
-      radius = geoScaleKilometers.radius,
-      tickValues,
       tickFormat = d => Math.round(d),
+      tickPadding = 2,
       tickSize = 4,
+      tickValues,
       labelText,
       labelAnchor = "start",
-      zoomFactor = 1,
-      orient = geoScaleBottom();
+      zoomFactor = 1;
 
   function scaleBar(context){    
     // If a label has not been explicitly set, set it
@@ -81,10 +82,10 @@ export default function(){
 
     text = text.merge(tickEnter.append("text")
         .attr("fill", "currentColor")
-        .attr("y", tickSize * orient + 2)
+        .attr("y", tickSize * orient + tickPadding * orient)
         .attr("font-size", 10)
         .attr("text-anchor", "middle")
-        .attr("dy", `${orient === 1 ? 0.71 : -0.35}em`));
+        .attr("dy", `${orient === 1 ? 0.71 : 0}em`));
     
     rect = rect.merge(tickEnter.append("rect")
         .attr("fill", (d, i) => i % 2 === 0 ?  "currentColor" : "#fff")
@@ -121,7 +122,7 @@ export default function(){
         .attr("y2", tickSize * orient);
 
     text
-        .attr("y", tickSize * orient + 2)
+        .attr("y", tickSize * orient + tickPadding * orient)
         .text(tickFormat);
     
     rect
@@ -191,6 +192,10 @@ export default function(){
   
   scaleBar.tickFormat = function(_) {
     return arguments.length ? (tickFormat = _, scaleBar) : tickFormat;
+  }
+  
+  scaleBar.tickPadding = function(_) {
+    return arguments.length ? (tickPadding = +_, scaleBar) : tickPadding;
   }
   
   scaleBar.tickSize = function(_) {
