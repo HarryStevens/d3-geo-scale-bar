@@ -243,7 +243,8 @@
         tickValues,
         labelText,
         labelAnchor = "start",
-        zoomFactor = 1;
+        zoomFactor = 1,
+        zoomClamp = true;
 
     function scaleBar(context) {
       // If a label has not been explicitly set, set it
@@ -253,10 +254,9 @@
           height = extent[1][1] - extent[0][1],
           x = extent[0][0] + width * left,
           y = extent[0][1] + height * top,
-          start = projection.invert([x, y]); // If the distance has been set explicitly
-
+          start = projection.invert([x, y]);
       var barDistance = 0,
-          barWidth = 0;
+          barWidth = 0; // If the distance has been set explicitly, calculate the bar's width
 
       if (distance) {
         barDistance = distance;
@@ -264,7 +264,7 @@
       } // Otherwise, make it an exponent of 10 or 10x4 with a minimum width of 60px 
       else {
           var dist = .01,
-              minWidth = 60,
+              minWidth = 60 / (zoomClamp ? 1 : zoomFactor),
               iters = 0,
               maxiters = 100;
 
@@ -280,7 +280,7 @@
         } // The ticks and elements of the bar
 
 
-      var max = barDistance / zoomFactor,
+      var max = barDistance / (zoomClamp ? zoomFactor : 1),
           values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
           scale = function scale(dist) {
         return dist * barWidth / (barDistance / zoomFactor);
@@ -400,6 +400,10 @@
       var _ref;
 
       return arguments.length ? ((_ref = _, units = _ref.units, radius = _ref.radius, _ref), scaleBar) : units;
+    };
+
+    scaleBar.zoomClamp = function (_) {
+      return arguments.length ? (zoomClamp = !!_, scaleBar) : zoomClamp;
     };
 
     scaleBar.zoomFactor = function (_) {

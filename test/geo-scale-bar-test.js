@@ -12,6 +12,7 @@ tape("geoScaleBar() has the expected defaults", function(test) {
   test.equal(s.top(), 0);
   test.equal(s.tickPadding(), 2);
   test.equal(s.tickSize(), 4);
+  test.equal(s.zoomClamp(), true);
   test.equal(s.zoomFactor(), 1);
   test.end();
 });

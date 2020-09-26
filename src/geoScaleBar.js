@@ -17,7 +17,8 @@ export default function(){
       tickValues,
       labelText,
       labelAnchor = "start",
-      zoomFactor = 1;
+      zoomFactor = 1,
+      zoomClamp = true;
 
   function scaleBar(context){    
     // If a label has not been explicitly set, set it
@@ -30,15 +31,18 @@ export default function(){
         y = extent[0][1] + height * top,
         start = projection.invert([x, y]);
     
-    // If the distance has been set explicitly
     let barDistance = 0, barWidth = 0;
+    // If the distance has been set explicitly, calculate the bar's width
     if (distance){
       barDistance = distance;
       barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
     }
     // Otherwise, make it an exponent of 10 or 10x4 with a minimum width of 60px 
     else {
-      let dist = .01, minWidth = 60, iters = 0, maxiters = 100;
+      let dist = .01,
+          minWidth = 60 / (zoomClamp ? 1 : zoomFactor),
+          iters = 0,
+          maxiters = 100;
       
       while (barWidth < minWidth && iters < maxiters){
         barDistance = dist;
@@ -52,7 +56,7 @@ export default function(){
     }
     
     // The ticks and elements of the bar
-    let max = barDistance / zoomFactor,
+    let max = barDistance / (zoomClamp ? zoomFactor : 1),
         values = tickValues === null ? [] : tickValues ? tickValues : [0, max / 4, max / 2, max],
         scale = dist => dist * barWidth / (barDistance / zoomFactor),
         selection = context.selection ? context.selection() : context,
@@ -208,6 +212,10 @@ export default function(){
   
   scaleBar.units = function(_) {
     return arguments.length ? ({units, radius} = _, scaleBar) : units;
+  }
+  
+  scaleBar.zoomClamp = function(_) {
+    return arguments.length ? (zoomClamp = !!_, scaleBar) : zoomClamp;
   }
   
   scaleBar.zoomFactor = function(_) {
