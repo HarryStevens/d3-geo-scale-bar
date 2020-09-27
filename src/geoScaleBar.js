@@ -32,24 +32,29 @@ export default function(){
         start = projection.invert([x, y]);
     
     let barDistance = 0, barWidth = 0;
+    
     // If the distance has been set explicitly, calculate the bar's width
     if (distance){
       barDistance = distance;
       barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
     }
-    // Otherwise, make it an exponent of 10 or 10x4 with a minimum width of 60px 
+
+    // Otherwise, make it an exponent of 10, 10x2, 10x4 or 10x5 with a minimum width of 60px 
     else {
       let dist = .01,
           minWidth = 60 / (zoomClamp ? 1 : zoomFactor),
           iters = 0,
-          maxiters = 100;
+          maxiters = 100,
+          multiples = [1, 2, 4, 5];
       
       while (barWidth < minWidth && iters < maxiters){
-        barDistance = dist;
-        barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
-        if (barWidth >= minWidth) break;
-        barDistance = dist * 4;
-        barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
+
+        for (let i = 0, l = multiples.length; i < l; i++){
+          barDistance = dist * multiples[i];
+          barWidth = barDistance / (geoDistance(start, projection.invert([x + 1, y])) * radius);
+          if (barWidth >= minWidth) break;
+        }
+
         dist *= 10;
         iters++;
       }
