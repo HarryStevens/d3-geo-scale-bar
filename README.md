@@ -11,7 +11,7 @@ If you use NPM, `npm install d3-geo-scale-bar`. Otherwise, download the [latest 
 <script>
 
 const projection = d3.geoMercator()
-    .fitSize(width, height], geoJSON);
+    .fitSize([width, height], geoJSON);
 
 const scaleBar = d3.geoScaleBar()
     .projection(projection)
