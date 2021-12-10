@@ -1,10 +1,9 @@
 const fs = require("fs"),
-    path = require("path"),
     tape = require("tape"),
     jsdom = require("jsdom"),
     d3 = Object.assign({}, require("d3-geo"), require("d3-selection"), require("../"));
 
-tape("geoScaleBar() has the expected defaults", function(test) {
+tape("geoScaleBar() has the expected defaults", test => {
   const s = d3.geoScaleBar();
   test.equal(s.units(), "kilometers");
   test.equal(s.radius(), 6371.0088);
@@ -17,7 +16,7 @@ tape("geoScaleBar() has the expected defaults", function(test) {
   test.end();
 });
 
-tape("Orientation methods are exported", function(test) {
+tape("Orientation methods are exported", test => {
   test.equal(d3.geoScaleBottom(), 1);
   test.equal(d3.geoScaleTop(), -1);
   const s = d3.geoScaleBar().orient(d3.geoScaleBottom);
@@ -27,7 +26,7 @@ tape("Orientation methods are exported", function(test) {
   test.end();
 });
 
-tape("Units objects are exported", function(test) {
+tape("Units objects are exported", test => {
   const feet = d3.geoScaleFeet;
   test.equal(feet.units, "feet");
   test.equal(feet.radius, 20902259.664);
@@ -63,24 +62,24 @@ tape("Units objects are exported", function(test) {
   test.end();
 });
 
-tape("scaleBar.extent(extent) sets the extent explicitly", function(test) {
+tape("scaleBar.extent(extent) sets the extent explicitly", test => {
   const s = d3.geoScaleBar().extent([[0, 0], [100, 100]]);
   test.deepEqual(s.extent(), [[0, 0], [100, 100]]);
   test.end();
 });
 
-tape("scaleBar.size(size) sets the size explicitly and the extent implicitly", function(test) {
+tape("scaleBar.size(size) sets the size explicitly and the extent implicitly", test => {
   const s = d3.geoScaleBar().size([100, 100]);
   test.deepEqual(s.extent(), [[0, 0], [100, 100]]);
   test.deepEqual(s.size(), [100, 100]);
   test.end();
 });
 
-tape("scaleBar(selection) produces the expected result", function(test) {
+tape("scaleBar(selection) produces the expected result", test => {
   const bodyActual = (new jsdom.JSDOM("<!DOCTYPE html><svg></svg>")).window.document.body;      
   const bodyExpected = (new jsdom.JSDOM(file("geo-scale-bar.html"))).window.document.body;
   
-  const india = JSON.parse(file("india.json"));
+  const india = JSON.parse(file("data/india.json"));
   const size = [900, 600];
   const projection = d3.geoMercator().fitSize(size, india);
   const s = d3.geoScaleBar()
@@ -96,6 +95,36 @@ tape("scaleBar(selection) produces the expected result", function(test) {
   test.end();
 });
 
+tape("Properly rounds decimal ticks", test => {
+  const body = (new jsdom.JSDOM("<!DOCTYPE html><svg></svg>")).window.document.body;      
+  
+  const monaco = JSON.parse(file("data/monaco.json"));
+  const size = 500;
+  const projection = d3.geoMercator().fitSize([size, size], monaco);
+  const path = d3.geoPath(projection);
+
+  const s = d3.geoScaleBar()
+    .top(.1)
+    .left(.01)
+    .projection(projection)
+    .size([size, size]);
+
+  const svg = d3.select(body).select("svg")
+      .attr("width", size)
+      .attr("height", size);
+  
+  const bar = svg.append("g")
+      .call(s);
+
+  const array = [];
+  bar.selectAll(".tick").each(function(){
+    array.push(+d3.select(this).text())
+  });
+  
+  test.deepEqual(array, [0, 0.25, 0.5, 1]);
+  test.end();
+});
+
 function file(file) {
-  return fs.readFileSync(path.join(__dirname, file), "utf8").replace(/\n\s*/mg, "");
+  return fs.readFileSync(`${__dirname}/${file}`, "utf8").replace(/\n\s*/mg, "");
 }

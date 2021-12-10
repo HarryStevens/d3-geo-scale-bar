@@ -11,7 +11,7 @@ export default function(){
       radius = geoScaleKilometers.radius,
       units = geoScaleKilometers.units,
       distance,
-      tickFormat = d => Math.round(d),
+      tickFormat = d => +d.toFixed(2),
       tickPadding = 2,
       tickSize = 4,
       tickValues,
