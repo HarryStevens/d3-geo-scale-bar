@@ -11,6 +11,7 @@ export default function(){
       radius = geoScaleKilometers.radius,
       units = geoScaleKilometers.units,
       distance,
+      distanceLog,
       tickFormat = d => +d.toFixed(2),
       tickPadding = 2,
       tickSize = 4,
@@ -59,7 +60,7 @@ export default function(){
         iters++;
       }
 
-      distance = barDistance;
+      distanceLog = barDistance;
     }
     
     // The ticks and elements of the bar
@@ -162,7 +163,7 @@ export default function(){
   }
 
   scaleBar.distance = function(_) {
-    return arguments.length ? (distance = +_, scaleBar) : distance;
+    return arguments.length ? (distance = +_, scaleBar) : distance || distanceLog;
   }
   
   scaleBar.extent = function(_) {
