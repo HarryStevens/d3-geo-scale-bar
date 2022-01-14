@@ -125,6 +125,27 @@ tape("Properly rounds decimal ticks", test => {
   test.end();
 });
 
+tape("scaleBar.distance() gets distance after scale bar is appended", test => {
+  const body = (new jsdom.JSDOM("<!DOCTYPE html><svg></svg>")).window.document.body;      
+  
+  const india = JSON.parse(file("data/india.json"));
+  const size = [900, 600];
+  const projection = d3.geoMercator().fitSize(size, india);
+  const s = d3.geoScaleBar()
+      .size(size)
+      .projection(projection)
+      .distance(1000)
+      .left(.1)
+      .top(.1);
+      
+  const svg = d3.select(body).select("svg").attr("width", size[0]).attr("height", size[1]);
+  svg.append("g").call(s);
+
+  test.equal(s.distance(), 1000);
+
+  test.end();
+});
+
 function file(file) {
   return fs.readFileSync(`${__dirname}/${file}`, "utf8").replace(/\n\s*/mg, "");
 }

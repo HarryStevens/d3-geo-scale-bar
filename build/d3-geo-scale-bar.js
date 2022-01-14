@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 1.2.0. Copyright 2021 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 1.2.0. Copyright 2022 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -279,6 +279,8 @@
             dist *= 10;
             iters++;
           }
+
+          distance = barDistance;
         } // The ticks and elements of the bar
 
 

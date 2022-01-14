@@ -58,6 +58,8 @@ export default function(){
         dist *= 10;
         iters++;
       }
+
+      distance = barDistance;
     }
     
     // The ticks and elements of the bar
