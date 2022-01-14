@@ -1,6 +1,6 @@
 {
   "name": "d3-geo-scale-bar",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Displays automatic scale bars for projected geospatial data.",
   "keywords": [
     "d3",
