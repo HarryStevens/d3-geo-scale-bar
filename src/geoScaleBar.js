@@ -148,12 +148,26 @@ export default function(){
       label.remove();
     }
     else {
+      if (context !== selection){
+        label.transition(context)
+            .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max))
+            .attr("y", orient === 1 ? 0 : "1.3em")
+            .attr("text-anchor", labelAnchor)
+            .text(d => d);
+      }
+      else {
+        label
+            .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max))
+            .attr("y", orient === 1 ? 0 : "1.3em")
+            .attr("text-anchor", labelAnchor)
+            .text(d => d);
+      }
+
       label.enter().append("text")
           .attr("class", "label")
           .attr("fill", "currentColor")
           .attr("font-size", 12)
           .attr("dy", "-0.32em")
-        .merge(label)
           .attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max))
           .attr("y", orient === 1 ? 0 : "1.3em")
           .attr("text-anchor", labelAnchor)
