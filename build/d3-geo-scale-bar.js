@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 1.2.4. Copyright 2022 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 1.2.5. Copyright 2022 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
