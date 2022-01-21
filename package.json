@@ -25,7 +25,7 @@
   "scripts": {
     "pretest": "rm -rf build && mkdir build && rollup -c --banner \"$(preamble)\"",
     "test": "tape 'test/**/*-test.js'",
-    "prepublish": "npm run test && uglifyjs build/d3-geo-scale-bar.js -c -m -o build/d3-geo-scale-bar.min.js",
+    "prepublishOnly": "npm run test && uglifyjs build/d3-geo-scale-bar.js -c -m -o build/d3-geo-scale-bar.min.js",
     "postpublish": "zip -j build/d3-geo-scale-bar.zip -- LICENSE README.md build/d3-geo-scale-bar.js build/d3-geo-scale-bar.min.js"
   },
   "devDependencies": {

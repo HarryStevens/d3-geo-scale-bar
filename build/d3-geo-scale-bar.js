@@ -1,4 +1,4 @@
-// https://github.com/HarryStevens/d3-geo-scale-bar Version 1.2.1. Copyright 2022 Harry Stevens.
+// https://github.com/HarryStevens/d3-geo-scale-bar Version 1.2.4. Copyright 2022 Harry Stevens.
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -339,7 +339,17 @@
       if (label === null) {
         label.remove();
       } else {
-        label.enter().append("text").attr("class", "label").attr("fill", "currentColor").attr("font-size", 12).attr("dy", "-0.32em").merge(label).attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max)).attr("y", orient === 1 ? 0 : "1.3em").attr("text-anchor", labelAnchor).text(function (d) {
+        if (context !== selection) {
+          label.transition(context).attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max)).attr("y", orient === 1 ? 0 : "1.3em").attr("text-anchor", labelAnchor).text(function (d) {
+            return d;
+          });
+        } else {
+          label.attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max)).attr("y", orient === 1 ? 0 : "1.3em").attr("text-anchor", labelAnchor).text(function (d) {
+            return d;
+          });
+        }
+
+        label.enter().append("text").attr("class", "label").attr("fill", "currentColor").attr("font-size", 12).attr("dy", "-0.32em").attr("x", labelAnchor === "start" ? 0 : labelAnchor === "middle" ? scale(max / 2) : scale(max)).attr("y", orient === 1 ? 0 : "1.3em").attr("text-anchor", labelAnchor).text(function (d) {
           return d;
         });
       }
